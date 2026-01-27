@@ -61,17 +61,47 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({ gameState }) => {
   
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4 text-center">スコア</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">スコア</h2>
       
-      <div className="flex justify-between items-center mb-4">
-        <div className={`flex items-center space-x-2 p-3 rounded ${gameState.currentPlayer === 'B' ? 'bg-gray-200' : ''}`}>
-          <div className="w-6 h-6 bg-black rounded-full border-2 border-gray-300"></div>
-          <span className="font-semibold">あなた (黒): {gameState.scores.black}</span>
+      <div className="space-y-3 mb-6">
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+          gameState.currentPlayer === 'B' 
+            ? 'bg-gray-800 border-gray-900 shadow-md' 
+            : 'bg-gray-100 border-gray-300'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-black rounded-full border-2 border-gray-400 shadow-sm"></div>
+            <span className={`font-bold text-lg ${
+              gameState.currentPlayer === 'B' ? 'text-white' : 'text-gray-800'
+            }`}>
+              あなた (黒)
+            </span>
+          </div>
+          <span className={`font-bold text-2xl ${
+            gameState.currentPlayer === 'B' ? 'text-white' : 'text-gray-800'
+          }`}>
+            {gameState.scores.black}
+          </span>
         </div>
         
-        <div className={`flex items-center space-x-2 p-3 rounded ${gameState.currentPlayer === 'W' ? 'bg-gray-200' : ''}`}>
-          <div className="w-6 h-6 bg-white rounded-full border-2 border-gray-300"></div>
-          <span className="font-semibold">CPU (白): {gameState.scores.white}</span>
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+          gameState.currentPlayer === 'W' 
+            ? 'bg-blue-600 border-blue-700 shadow-md' 
+            : 'bg-gray-100 border-gray-300'
+        }`}>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white rounded-full border-2 border-gray-400 shadow-sm"></div>
+            <span className={`font-bold text-lg ${
+              gameState.currentPlayer === 'W' ? 'text-white' : 'text-gray-800'
+            }`}>
+              CPU (白)
+            </span>
+          </div>
+          <span className={`font-bold text-2xl ${
+            gameState.currentPlayer === 'W' ? 'text-white' : 'text-gray-800'
+          }`}>
+            {gameState.scores.white}
+          </span>
         </div>
       </div>
 
