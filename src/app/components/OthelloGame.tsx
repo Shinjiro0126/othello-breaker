@@ -172,6 +172,12 @@ const OthelloGameComponent: React.FC = () => {
           moves: gameState.moveCount,
         }).catch((error) => {
           console.error('Failed to save game result:', error);
+          if (typeof window !== 'undefined') {
+            window.alert(
+              'Your game result could not be saved due to a server or network error. ' +
+              'Please check your connection and try again later.'
+            );
+          }
         });
       }
     } else if (gameState.gamePhase === 'playing') {
