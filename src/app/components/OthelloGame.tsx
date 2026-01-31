@@ -338,8 +338,7 @@ const OthelloGameComponent: React.FC = () => {
                 lastMove: move,
                 validMoves: [],
                 isThinking: true,
-                generationId: generationRef.current,
-                moveCount: prevState.moveCount + 1
+                generationId: generationRef.current
               };
             }
           }
