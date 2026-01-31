@@ -303,8 +303,7 @@ const OthelloGameComponent: React.FC = () => {
                   lastMove: move,
                   validMoves: [],
                   isThinking: true,
-                  generationId: nextGen,
-                  moveCount: currentState.moveCount + 1
+                  generationId: nextGen
                 }));
 
                 thinkAsync(newBoard, 'W', nextGen).then(nextResult => {
