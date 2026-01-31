@@ -178,7 +178,9 @@ const OthelloGameComponent: React.FC = () => {
       // Reset the flag when a new game starts
       savedGameRef.current = false;
     }
-  }, [gameState.gamePhase, gameState.board, gameState.scores, gameState.moveCount]);
+    // Note: Only depend on gamePhase to trigger saves. Other values are read from current state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState.gamePhase]);
 
   // AI思考処理（非同期）
   const thinkAsync = useCallback(async (board: Piece[], player: 'B' | 'W', gen: number) => {
@@ -350,6 +352,8 @@ const OthelloGameComponent: React.FC = () => {
         });
       });
     }
+    // Note: gameState.board is intentionally not in dependencies to avoid infinite loops
+    // The board value is captured at the moment when currentPlayer/gamePhase/isThinking changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentPlayer, gameState.gamePhase, gameState.isThinking, thinkAsync]);
 
