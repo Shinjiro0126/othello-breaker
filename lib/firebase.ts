@@ -10,15 +10,25 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-let app: FirebaseApp;
-let db: Firestore;
+let app: FirebaseApp | undefined;
+let db: Firestore | undefined;
 
-if (getApps().length === 0) {
-  app = initializeApp(firebaseConfig);
+function initializeFirebase(): { app: FirebaseApp; db: Firestore } {
+  if (app && db) {
+    return { app, db };
+  }
+
+  const apps = getApps();
+
+  if (apps.length === 0) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = apps[0];
+  }
+
   db = getFirestore(app);
-} else {
-  app = getApps()[0];
-  db = getFirestore(app);
+
+  return { app, db };
 }
 
-export { app, db };
+export { initializeFirebase };
