@@ -12,7 +12,7 @@ export interface GameResult {
 /**
  * Save game result to Firestore
  * @param result Game result data
- * @returns Promise with document ID or error
+ * @returns Promise that resolves to the document ID on success, or rejects with an error on failure
  */
 export async function saveGameResult(result: GameResult): Promise<string> {
   try {
