@@ -13,6 +13,7 @@ export interface GameState {
   validMoves: number[];
   isThinking: boolean;
   generationId: number;
+  moveCount: number;
 }
 
 export interface AIWorkerMessage {

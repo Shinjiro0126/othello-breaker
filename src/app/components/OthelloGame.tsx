@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { OthelloGame } from '../utils/othelloGame';
 import { OthelloAI } from '../ai/othelloAI';
-import type { GameState, Piece, AIWorkerMessage, AIWorkerResponse } from '../types/game';
+import type { GameState, Piece } from '../types/game';
+import { saveGameResult } from '../../../lib/gameResults';
 
 const CELL_SIZE = 'w-12 h-12 sm:w-16 sm:h-16';
 const PIECE_SIZE = 'w-8 h-8 sm:w-12 sm:h-12';
@@ -149,11 +150,35 @@ const OthelloGameComponent: React.FC = () => {
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
       isThinking: false,
-      generationId: 0
+      generationId: 0,
+      moveCount: 0
     };
   });
 
   const generationRef = useRef(0);
+  const savedGameRef = useRef(false);
+
+  // Save game result when game is over
+  useEffect(() => {
+    if (gameState.gamePhase === 'gameOver' && !savedGameRef.current) {
+      const winner = OthelloGame.getWinner(gameState.board);
+      if (winner !== null) {
+        savedGameRef.current = true;
+        saveGameResult({
+          timestamp: new Date(),
+          winner,
+          blackScore: gameState.scores.black,
+          whiteScore: gameState.scores.white,
+          moves: gameState.moveCount,
+        }).catch((error) => {
+          console.error('Failed to save game result:', error);
+        });
+      }
+    } else if (gameState.gamePhase === 'playing') {
+      // Reset the flag when a new game starts
+      savedGameRef.current = false;
+    }
+  }, [gameState.gamePhase, gameState.board, gameState.scores, gameState.moveCount]);
 
   // AI思考処理（非同期）
   const thinkAsync = useCallback(async (board: Piece[], player: 'B' | 'W', gen: number) => {
@@ -256,7 +281,8 @@ const OthelloGameComponent: React.FC = () => {
                 lastMove: move,
                 gamePhase: 'gameOver',
                 isThinking: false,
-                validMoves: []
+                validMoves: [],
+                moveCount: prevState.moveCount + 1
               };
             } else {
               // CPUが連続手番 - 再帰的に処理
@@ -270,7 +296,8 @@ const OthelloGameComponent: React.FC = () => {
                   lastMove: move,
                   validMoves: [],
                   isThinking: true,
-                  generationId: nextGen
+                  generationId: nextGen,
+                  moveCount: currentState.moveCount + 1
                 }));
 
                 thinkAsync(newBoard, 'W', nextGen).then(nextResult => {
@@ -288,7 +315,8 @@ const OthelloGameComponent: React.FC = () => {
                         scores: nextScores,
                         lastMove: nextResult.move,
                         validMoves: nextHumanMoves,
-                        isThinking: false
+                        isThinking: false,
+                        moveCount: state.moveCount + 1
                       }));
                     }
                   }
@@ -302,7 +330,8 @@ const OthelloGameComponent: React.FC = () => {
                 lastMove: move,
                 validMoves: [],
                 isThinking: true,
-                generationId: generationRef.current
+                generationId: generationRef.current,
+                moveCount: prevState.moveCount + 1
               };
             }
           }
@@ -315,11 +344,13 @@ const OthelloGameComponent: React.FC = () => {
             scores: newScores,
             lastMove: move,
             validMoves: humanMoves,
-            isThinking: false
+            isThinking: false,
+            moveCount: prevState.moveCount + 1
           };
         });
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.currentPlayer, gameState.gamePhase, gameState.isThinking, thinkAsync]);
 
   const handleCellClick = useCallback((index: number) => {
@@ -350,7 +381,8 @@ const OthelloGameComponent: React.FC = () => {
           lastMove: index,
           gamePhase: 'gameOver',
           validMoves: [],
-          generationId: generationRef.current
+          generationId: generationRef.current,
+          moveCount: prev.moveCount + 1
         }));
         return;
       } else {
@@ -361,7 +393,8 @@ const OthelloGameComponent: React.FC = () => {
           scores: newScores,
           lastMove: index,
           validMoves: humanMoves,
-          generationId: generationRef.current
+          generationId: generationRef.current,
+          moveCount: prev.moveCount + 1
         }));
         return;
       }
@@ -376,7 +409,8 @@ const OthelloGameComponent: React.FC = () => {
       lastMove: index,
       validMoves: [],
       isThinking: false,
-      generationId: generationRef.current
+      generationId: generationRef.current,
+      moveCount: prev.moveCount + 1
     }));
   }, [gameState]);
 
@@ -391,7 +425,8 @@ const OthelloGameComponent: React.FC = () => {
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
       isThinking: false,
-      generationId: generationRef.current
+      generationId: generationRef.current,
+      moveCount: 0
     });
   }, []);
 
