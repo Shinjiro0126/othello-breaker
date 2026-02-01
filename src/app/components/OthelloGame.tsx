@@ -161,18 +161,29 @@ const OthelloGameComponent: React.FC = () => {
     };
   });
 
-  const [stats, setStats] = useState<GameStats>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('othello-stats');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    }
-    return { totalGames: 0, wins: 0, losses: 0, ties: 0 };
+  const [stats, setStats] = useState<GameStats>({
+    totalGames: 0,
+    wins: 0,
+    losses: 0,
+    ties: 0
   });
 
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
+
+  // localStorageから統計を読み込み（クライアントサイドのみ）
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('othello-stats');
+      if (saved) {
+        try {
+          setStats(JSON.parse(saved));
+        } catch (error) {
+          console.error('Failed to parse stats from localStorage:', error);
+        }
+      }
+    }
+  }, []);
 
   // 統計をlocalStorageに保存
   useEffect(() => {
