@@ -4,9 +4,17 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { OthelloGame } from '../utils/othelloGame';
 import { OthelloAI } from '../ai/othelloAI';
 import type { GameState, Piece, AIWorkerMessage, AIWorkerResponse } from '../types/game';
+import { saveGameResult } from '@/lib/firebase/firestore';
 
 const CELL_SIZE = 'w-12 h-12 sm:w-16 sm:h-16';
 const PIECE_SIZE = 'w-8 h-8 sm:w-12 sm:h-12';
+
+interface GameStats {
+  totalGames: number;
+  wins: number;
+  losses: number;
+  ties: number;
+}
 
 interface OthelloBoardProps {
   gameState: GameState;
@@ -153,7 +161,58 @@ const OthelloGameComponent: React.FC = () => {
     };
   });
 
+  const [stats, setStats] = useState<GameStats>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('othello-stats');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    }
+    return { totalGames: 0, wins: 0, losses: 0, ties: 0 };
+  });
+
   const generationRef = useRef(0);
+  const savedGameRef = useRef(false);
+
+  // 統計をlocalStorageに保存
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('othello-stats', JSON.stringify(stats));
+    }
+  }, [stats]);
+
+  // ゲーム終了時の統計更新
+  useEffect(() => {
+    if (gameState.gamePhase === 'gameOver' && !savedGameRef.current) {
+      savedGameRef.current = true;
+      const winner = OthelloGame.getWinner(gameState.board);
+      if (winner) {
+        // ローカル統計を更新
+        setStats(prevStats => {
+          const newStats = {
+            totalGames: prevStats.totalGames + 1,
+            wins: winner === 'B' ? prevStats.wins + 1 : prevStats.wins,
+            losses: winner === 'W' ? prevStats.losses + 1 : prevStats.losses,
+            ties: winner === 'tie' ? prevStats.ties + 1 : prevStats.ties
+          };
+          return newStats;
+        });
+
+        // Firestoreに保存
+        const totalMoves = gameState.scores.black + gameState.scores.white - 4; // 初期配置4石を除く
+        saveGameResult({
+          winner,
+          blackScore: gameState.scores.black,
+          whiteScore: gameState.scores.white,
+          totalMoves,
+        }).catch(error => {
+          console.error('Failed to save game result to Firestore:', error);
+        });
+      }
+    } else if (gameState.gamePhase === 'playing') {
+      savedGameRef.current = false;
+    }
+  }, [gameState.gamePhase, gameState.scores.black, gameState.scores.white]);
 
   // AI思考処理（非同期）
   const thinkAsync = useCallback(async (board: Piece[], player: 'B' | 'W', gen: number) => {
@@ -382,6 +441,7 @@ const OthelloGameComponent: React.FC = () => {
 
   const resetGame = useCallback(() => {
     generationRef.current++;
+    savedGameRef.current = false;
     const initialBoard = OthelloGame.createInitialBoard();
     setGameState({
       board: initialBoard,
@@ -413,13 +473,45 @@ const OthelloGameComponent: React.FC = () => {
           <div className="space-y-6">
             <ScoreBoard gameState={gameState} />
             
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-              <button
-                onClick={resetGame}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                新しいゲーム
-              </button>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">対戦成績</h3>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{stats.totalGames}</div>
+                    <div className="text-sm text-gray-600">対戦数</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0}%
+                    </div>
+                    <div className="text-sm text-gray-600">勝率</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div className="bg-green-50 p-2 rounded">
+                    <div className="font-bold text-green-700">{stats.wins}</div>
+                    <div className="text-gray-600">勝利</div>
+                  </div>
+                  <div className="bg-red-50 p-2 rounded">
+                    <div className="font-bold text-red-700">{stats.losses}</div>
+                    <div className="text-gray-600">敗北</div>
+                  </div>
+                  <div className="bg-gray-50 p-2 rounded">
+                    <div className="font-bold text-gray-700">{stats.ties}</div>
+                    <div className="text-gray-600">引分</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <button
+                  onClick={resetGame}
+                  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  新しいゲーム
+                </button>
+              </div>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
