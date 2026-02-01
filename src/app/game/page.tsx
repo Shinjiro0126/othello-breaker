@@ -10,7 +10,7 @@ import { OthelloAI } from '../ai/othelloAI';
 import type { Piece } from '../types/game';
 import { saveGameResult } from '@/lib/firebase/firestore';
 
-const GamePage: React.FC = () => {
+export default function GamePage() {
   const { gameState, setGameState, setStats } = useGameContext();
   const router = useRouter();
   const generationRef = useRef(0);
@@ -290,6 +290,4 @@ const GamePage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default GamePage;
+}

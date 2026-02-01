@@ -7,7 +7,7 @@ interface ScoreBoardProps {
   gameState: GameState;
 }
 
-const ScoreBoard: React.FC<ScoreBoardProps> = ({ gameState }) => {
+function ScoreBoard({ gameState }: ScoreBoardProps) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">スコア</h2>
@@ -71,6 +71,6 @@ const ScoreBoard: React.FC<ScoreBoardProps> = ({ gameState }) => {
       )}
     </div>
   );
-};
+}
 
 export default ScoreBoard;

@@ -34,7 +34,7 @@ interface GameProviderProps {
   children: ReactNode;
 }
 
-export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
+export function GameProvider({ children }: GameProviderProps) {
   const [gameState, setGameState] = useState<GameState>(() => {
     const initialBoard = OthelloGame.createInitialBoard();
     return {
@@ -100,4 +100,4 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
       {children}
     </GameContext.Provider>
   );
-};
+}

@@ -11,7 +11,7 @@ interface OthelloBoardProps {
   onCellClick: (index: number) => void;
 }
 
-const OthelloBoard: React.FC<OthelloBoardProps> = ({ gameState, onCellClick }) => {
+function OthelloBoard({ gameState, onCellClick }: OthelloBoardProps) {
   const renderCell = (piece: Piece, index: number) => {
     const isValidMove = gameState.validMoves.includes(index);
     const isLastMove = gameState.lastMove === index;
@@ -48,6 +48,6 @@ const OthelloBoard: React.FC<OthelloBoardProps> = ({ gameState, onCellClick }) =
       {gameState.board.map((piece, index) => renderCell(piece, index))}
     </div>
   );
-};
+}
 
 export default OthelloBoard;

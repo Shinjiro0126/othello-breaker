@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import { OthelloGame } from '../utils/othelloGame';
 
-const ResultPage: React.FC = () => {
+export default function ResultPage() {
   const { gameState, startNewGame } = useGameContext();
   const router = useRouter();
   const winner = OthelloGame.getWinner(gameState.board);
@@ -100,6 +100,4 @@ const ResultPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default ResultPage;
+}
