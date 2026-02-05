@@ -144,48 +144,16 @@ export default function GamePage() {
                 validMoves: []
               };
             } else {
-              setTimeout(() => {
-                generationRef.current++;
-                const nextGen = generationRef.current;
-                setGameState(currentState => ({
-                  ...currentState,
-                  board: newBoard,
-                  scores: newScores,
-                  lastMove: move,
-                  validMoves: [],
-                  isThinking: true,
-                  generationId: nextGen
-                }));
-
-                thinkAsync(newBoard, 'W', nextGen).then(nextResult => {
-                  if (nextResult.gen === generationRef.current) {
-                    const nextBoard = nextResult.move ? OthelloGame.makeMove(newBoard, nextResult.move, 'W') : newBoard;
-                    if (nextBoard) {
-                      const nextScores = OthelloGame.countPieces(nextBoard);
-                      const nextHumanMoves = OthelloGame.getValidMoves(nextBoard, 'B');
-                      
-                      setGameState(state => ({
-                        ...state,
-                        board: nextBoard,
-                        currentPlayer: 'B',
-                        scores: nextScores,
-                        lastMove: nextResult.move,
-                        validMoves: nextHumanMoves,
-                        isThinking: false
-                      }));
-                    }
-                  }
-                });
-              }, 500);
-
+              // CPUが連続手番（人間がパス）
+              // 次のAI処理はuseEffectに任せて、現在の状態を更新するだけ
               return {
                 ...prevState,
                 board: newBoard,
                 scores: newScores,
                 lastMove: move,
+                currentPlayer: 'W',
                 validMoves: [],
-                isThinking: true,
-                generationId: generationRef.current
+                isThinking: false
               };
             }
           }
