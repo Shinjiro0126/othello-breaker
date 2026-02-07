@@ -332,14 +332,14 @@ export class OthelloAI {
 
     const emptyCount = 64 - this.countPieces(board).black - this.countPieces(board).white;
     
-    // 終盤完全読み
+    // 終盤完全読み (check endgame before depth limit)
+    if (endgameSolverThreshold > 0 && emptyCount <= endgameSolverThreshold) {
+      return this.negamaxEndgame(board, alpha, beta, player, deadline);
+    }
+    
     if (depth <= 0) {
       const score = this.evaluate(board, player);
       return { score, move: moves[0] };
-    }
-    
-    if (endgameSolverThreshold > 0 && emptyCount <= endgameSolverThreshold) {
-      return this.negamaxEndgame(board, alpha, beta, player, deadline);
     }
 
     // 通常の探索
