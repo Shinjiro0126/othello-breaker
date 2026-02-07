@@ -9,12 +9,16 @@ import { OthelloGame } from '../utils/othelloGame';
 import { OthelloAI } from '../ai/othelloAI';
 import type { Piece } from '../types/game';
 import { saveGameResult } from '@/lib/firebase/firestore';
+import { DIFFICULTY_CONFIGS } from '../config/difficulty';
 
 export default function GamePage() {
-  const { gameState, setGameState, setStats } = useGameContext();
+  const { gameState, setGameState, setStats, difficulty } = useGameContext();
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
+
+  // Get difficulty configuration
+  const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
 
   // ゲーム終了時の統計更新と結果ページへの遷移
   useEffect(() => {
@@ -65,7 +69,14 @@ export default function GamePage() {
             return;
           }
 
-          const bestMove = OthelloAI.findBestMove(board, player, 1000);
+          const bestMove = OthelloAI.findBestMove(
+            board, 
+            player, 
+            difficultyConfig.timeMs,
+            difficultyConfig.maxDepth,
+            difficultyConfig.useIterativeDeepening,
+            difficultyConfig.endgameSolverThreshold
+          );
           
           if (bestMove !== null && validMoves.includes(bestMove)) {
             resolve({ move: bestMove, gen });
@@ -82,7 +93,7 @@ export default function GamePage() {
         }
       }, 100);
     });
-  }, []);
+  }, [difficultyConfig]);
 
   // CPU手番時の処理
   useEffect(() => {

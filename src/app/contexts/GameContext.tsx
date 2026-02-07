@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { GameState } from '../types/game';
+import type { GameState, DifficultyLevel } from '../types/game';
 import { OthelloGame } from '../utils/othelloGame';
+import { DEFAULT_DIFFICULTY } from '../config/difficulty';
 
 interface GameStats {
   totalGames: number;
@@ -16,8 +17,10 @@ interface GameContextType {
   setGameState: React.Dispatch<React.SetStateAction<GameState>>;
   stats: GameStats;
   setStats: React.Dispatch<React.SetStateAction<GameStats>>;
+  difficulty: DifficultyLevel;
+  setDifficulty: (difficulty: DifficultyLevel) => void;
   resetGame: () => void;
-  startNewGame: () => void;
+  startNewGame: (difficulty?: DifficultyLevel) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -35,6 +38,16 @@ interface GameProviderProps {
 }
 
 export function GameProvider({ children }: GameProviderProps) {
+  const [difficulty, setDifficultyState] = useState<DifficultyLevel>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('othello-difficulty');
+      if (saved && ['beginner', 'normal', 'hard', 'master'].includes(saved)) {
+        return saved as DifficultyLevel;
+      }
+    }
+    return DEFAULT_DIFFICULTY;
+  });
+
   const [gameState, setGameState] = useState<GameState>(() => {
     const initialBoard = OthelloGame.createInitialBoard();
     return {
@@ -45,7 +58,8 @@ export function GameProvider({ children }: GameProviderProps) {
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
       isThinking: false,
-      generationId: 0
+      generationId: 0,
+      difficulty
     };
   });
 
@@ -77,6 +91,17 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   }, [stats]);
 
+  // Save difficulty to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('othello-difficulty', difficulty);
+    }
+  }, [difficulty]);
+
+  const setDifficulty = (newDifficulty: DifficultyLevel) => {
+    setDifficultyState(newDifficulty);
+  };
+
   const resetGame = () => {
     const initialBoard = OthelloGame.createInitialBoard();
     setGameState({
@@ -87,16 +112,32 @@ export function GameProvider({ children }: GameProviderProps) {
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
       isThinking: false,
-      generationId: Date.now()
+      generationId: Date.now(),
+      difficulty
     });
   };
 
-  const startNewGame = () => {
-    resetGame();
+  const startNewGame = (newDifficulty?: DifficultyLevel) => {
+    if (newDifficulty) {
+      setDifficulty(newDifficulty);
+    }
+    const useDifficulty = newDifficulty || difficulty;
+    const initialBoard = OthelloGame.createInitialBoard();
+    setGameState({
+      board: initialBoard,
+      currentPlayer: 'B',
+      gamePhase: 'playing',
+      scores: OthelloGame.countPieces(initialBoard),
+      lastMove: null,
+      validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
+      isThinking: false,
+      generationId: Date.now(),
+      difficulty: useDifficulty
+    });
   };
 
   return (
-    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, resetGame, startNewGame }}>
+    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, difficulty, setDifficulty, resetGame, startNewGame }}>
       {children}
     </GameContext.Provider>
   );
