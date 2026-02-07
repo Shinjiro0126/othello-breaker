@@ -1,6 +1,16 @@
 // ゲームの型定義
 export type Piece = 'B' | 'W' | null;
 
+export type DifficultyLevel = 'beginner' | 'normal' | 'hard' | 'master';
+
+export interface DifficultyConfig {
+  maxDepth: number;
+  timeMs: number;
+  useIterativeDeepening: boolean;
+  useEndgameSolver: boolean;
+  endgameSolverThreshold: number;
+}
+
 export interface GameState {
   board: Piece[];
   currentPlayer: 'B' | 'W';
@@ -13,6 +23,7 @@ export interface GameState {
   validMoves: number[];
   isThinking: boolean;
   generationId: number;
+  difficulty?: DifficultyLevel;
 }
 
 export interface AIWorkerMessage {

@@ -291,7 +291,8 @@ export class OthelloAI {
     alpha: number, 
     beta: number, 
     player: 'B' | 'W',
-    deadline: number
+    deadline: number,
+    endgameSolverThreshold: number = 14
   ): { score: number; move: number | null } {
     // 時間切れチェック
     if (Date.now() >= deadline) {
@@ -324,21 +325,21 @@ export class OthelloAI {
         return { score: finalScore, move: null };
       } else {
         // パス
-        const result = this.negamax(board, depth - 1, -beta, -alpha, opponent, deadline);
+        const result = this.negamax(board, depth - 1, -beta, -alpha, opponent, deadline, endgameSolverThreshold);
         return { score: -result.score, move: null };
       }
     }
 
     const emptyCount = 64 - this.countPieces(board).black - this.countPieces(board).white;
     
-    // 終盤完全読み
-    if (emptyCount <= 14 || depth <= 0) {
-      if (emptyCount <= 14) {
-        return this.negamaxEndgame(board, alpha, beta, player, deadline);
-      } else {
-        const score = this.evaluate(board, player);
-        return { score, move: moves[0] };
-      }
+    // 終盤完全読み (check endgame before depth limit)
+    if (endgameSolverThreshold > 0 && emptyCount <= endgameSolverThreshold) {
+      return this.negamaxEndgame(board, alpha, beta, player, deadline);
+    }
+    
+    if (depth <= 0) {
+      const score = this.evaluate(board, player);
+      return { score, move: moves[0] };
     }
 
     // 通常の探索
@@ -352,7 +353,7 @@ export class OthelloAI {
       const newBoard = this.makeMove(board, move, player);
       if (!newBoard) continue;
 
-      const result = this.negamax(newBoard, depth - 1, -beta, -alpha, opponent, deadline);
+      const result = this.negamax(newBoard, depth - 1, -beta, -alpha, opponent, deadline, endgameSolverThreshold);
       const score = -result.score;
 
       if (score > bestScore) {
@@ -438,7 +439,9 @@ export class OthelloAI {
     board: Piece[], 
     player: 'B' | 'W', 
     timeMs: number, 
-    maxDepth: number = 15
+    maxDepth: number = 15,
+    useIterativeDeepening: boolean = true,
+    endgameSolverThreshold: number = 14
   ): number | null {
     const startTime = Date.now();
     const deadline = startTime + timeMs * 0.9; // 余裕をもって90%の時間で切り上げ
@@ -455,12 +458,25 @@ export class OthelloAI {
     // 安全な初期手（角優先）
     let bestMove = orderedMoves[0];
 
+    // 反復深化を使わない場合は直接maxDepthで探索
+    if (!useIterativeDeepening) {
+      try {
+        const result = this.negamax(board, maxDepth, -Infinity, Infinity, player, deadline, endgameSolverThreshold);
+        if (result.move !== null && moves.includes(result.move)) {
+          bestMove = result.move;
+        }
+      } catch (error) {
+        console.warn('AI negamax error at depth', maxDepth, error);
+      }
+      return bestMove;
+    }
+
     // 反復深化
     for (let depth = 1; depth <= maxDepth; depth++) {
       if (Date.now() >= deadline) break;
 
       try {
-        const result = this.negamax(board, depth, -Infinity, Infinity, player, deadline);
+        const result = this.negamax(board, depth, -Infinity, Infinity, player, deadline, endgameSolverThreshold);
         
         if (result.move !== null && Date.now() < deadline && moves.includes(result.move)) {
           bestMove = result.move;

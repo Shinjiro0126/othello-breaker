@@ -2,13 +2,17 @@
 
 import { useGameContext } from './contexts/GameContext';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import type { DifficultyLevel } from './types/game';
+import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DIFFICULTY_CONFIGS } from './config/difficulty';
 
 export default function Home() {
-  const { stats, startNewGame } = useGameContext();
+  const { stats, difficulty, startNewGame } = useGameContext();
   const router = useRouter();
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>(difficulty);
 
   const handleStartGame = () => {
-    startNewGame();
+    startNewGame(selectedDifficulty);
     router.push('/game');
   };
 
@@ -49,6 +53,35 @@ export default function Home() {
               <div className="text-2xl font-bold text-gray-700">{stats.ties}</div>
               <div className="text-sm text-gray-600">引分</div>
             </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-8 rounded-lg shadow-lg mb-8">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">難易度選択</h2>
+          <div className="space-y-3">
+            {(Object.keys(DIFFICULTY_CONFIGS) as DifficultyLevel[]).map((level) => (
+              <label
+                key={level}
+                className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedDifficulty === level
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="difficulty"
+                  value={level}
+                  checked={selectedDifficulty === level}
+                  onChange={(e) => setSelectedDifficulty(e.target.value as DifficultyLevel)}
+                  className="mt-1 mr-3"
+                />
+                <div className="flex-1">
+                  <div className="font-semibold text-gray-800">{DIFFICULTY_LABELS[level]}</div>
+                  <div className="text-sm text-gray-600 mt-1">{DIFFICULTY_DESCRIPTIONS[level]}</div>
+                </div>
+              </label>
+            ))}
           </div>
         </div>
 
