@@ -102,25 +102,7 @@ export function GameProvider({ children }: GameProviderProps) {
     setDifficultyState(newDifficulty);
   };
 
-  const resetGame = () => {
-    const initialBoard = OthelloGame.createInitialBoard();
-    setGameState({
-      board: initialBoard,
-      currentPlayer: 'B',
-      gamePhase: 'playing',
-      scores: OthelloGame.countPieces(initialBoard),
-      lastMove: null,
-      validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
-      isThinking: false,
-      generationId: Date.now(),
-      difficulty
-    });
-  };
-
-  const startNewGame = (newDifficulty?: DifficultyLevel) => {
-    if (newDifficulty) {
-      setDifficulty(newDifficulty);
-    }
+  const resetGame = (newDifficulty?: DifficultyLevel) => {
     const useDifficulty = newDifficulty || difficulty;
     const initialBoard = OthelloGame.createInitialBoard();
     setGameState({
@@ -134,6 +116,13 @@ export function GameProvider({ children }: GameProviderProps) {
       generationId: Date.now(),
       difficulty: useDifficulty
     });
+  };
+
+  const startNewGame = (newDifficulty?: DifficultyLevel) => {
+    if (newDifficulty) {
+      setDifficulty(newDifficulty);
+    }
+    resetGame(newDifficulty);
   };
 
   return (
