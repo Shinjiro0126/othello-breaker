@@ -12,7 +12,7 @@ import { saveGameResult } from '@/lib/firebase/firestore';
 import { DIFFICULTY_CONFIGS } from '../config/difficulty';
 
 export default function GamePage() {
-  const { gameState, setGameState, setStats, difficulty } = useGameContext();
+  const { gameState, setGameState, refreshStats } = useGameContext();
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
@@ -26,17 +26,6 @@ export default function GamePage() {
       savedGameRef.current = true;
       const winner = OthelloGame.getWinner(gameState.board);
       if (winner) {
-        // ローカル統計を更新
-        setStats(prevStats => {
-          const newStats = {
-            totalGames: prevStats.totalGames + 1,
-            wins: winner === 'B' ? prevStats.wins + 1 : prevStats.wins,
-            losses: winner === 'W' ? prevStats.losses + 1 : prevStats.losses,
-            ties: winner === 'tie' ? prevStats.ties + 1 : prevStats.ties
-          };
-          return newStats;
-        });
-
         // Firestoreに保存
         const totalMoves = gameState.scores.black + gameState.scores.white - 4;
         saveGameResult({
@@ -44,6 +33,9 @@ export default function GamePage() {
           blackScore: gameState.scores.black,
           whiteScore: gameState.scores.white,
           totalMoves,
+        }).then(() => {
+          // 保存成功後に統計を更新
+          refreshStats();
         }).catch(error => {
           console.error('Failed to save game result to Firestore:', error);
         });
@@ -56,7 +48,7 @@ export default function GamePage() {
     } else if (gameState.gamePhase === 'playing') {
       savedGameRef.current = false;
     }
-  }, [gameState.gamePhase, gameState.scores.black, gameState.scores.white, router, setStats]);
+  }, [gameState.gamePhase, gameState.scores.black, gameState.scores.white, router, refreshStats]);
 
   // AI思考処理（非同期）
   const thinkAsync = useCallback(async (board: Piece[], player: 'B' | 'W', gen: number) => {

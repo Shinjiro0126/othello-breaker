@@ -104,13 +104,11 @@ export function calculateStats(results: GameResult[]) {
   const wins = results.filter(r => r.winner === 'B').length;
   const losses = results.filter(r => r.winner === 'W').length;
   const ties = results.filter(r => r.winner === 'tie').length;
-  const winRate = totalGames > 0 ? (wins / totalGames) * 100 : 0;
   
   return {
     totalGames,
     wins,
     losses,
     ties,
-    winRate: Math.round(winRate * 10) / 10, // 小数点1桁
   };
 }

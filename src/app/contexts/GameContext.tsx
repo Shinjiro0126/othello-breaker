@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import type { GameState, DifficultyLevel } from '../types/game';
 import { OthelloGame } from '../utils/othelloGame';
 import { DEFAULT_DIFFICULTY } from '../config/difficulty';
+import { getAllGameResults, calculateStats } from '@/lib/firebase/firestore';
 
 interface GameStats {
   totalGames: number;
@@ -17,6 +18,8 @@ interface GameContextType {
   setGameState: React.Dispatch<React.SetStateAction<GameState>>;
   stats: GameStats;
   setStats: React.Dispatch<React.SetStateAction<GameStats>>;
+  isLoadingStats: boolean;
+  refreshStats: () => Promise<void>;
   difficulty: DifficultyLevel;
   setDifficulty: (difficulty: DifficultyLevel) => void;
   resetGame: () => void;
@@ -70,26 +73,26 @@ export function GameProvider({ children }: GameProviderProps) {
     ties: 0
   });
 
-  // Load stats from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('othello-stats');
-      if (saved) {
-        try {
-          setStats(JSON.parse(saved));
-        } catch (error) {
-          console.error('Failed to parse stats from localStorage:', error);
-        }
-      }
-    }
-  }, []);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Save stats to localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('othello-stats', JSON.stringify(stats));
+  // Firestoreから統計を取得
+  const refreshStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const results = await getAllGameResults();
+      const calculated = calculateStats(results);
+      setStats(calculated);
+    } catch (error) {
+      console.error('Failed to fetch stats from Firestore:', error);
+    } finally {
+      setIsLoadingStats(false);
     }
-  }, [stats]);
+  };
+
+  // 初回マウント時に統計を取得
+  useEffect(() => {
+    refreshStats();
+  }, []);
 
   // Save difficulty to localStorage
   useEffect(() => {
