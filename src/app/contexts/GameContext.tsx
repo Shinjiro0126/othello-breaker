@@ -129,7 +129,7 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   return (
-    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, difficulty, setDifficulty, resetGame, startNewGame }}>
+    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, isLoadingStats, refreshStats, difficulty, setDifficulty, resetGame, startNewGame }}>
       {children}
     </GameContext.Provider>
   );
