@@ -12,7 +12,7 @@ import { saveGameResult } from '@/lib/firebase/firestore';
 import { DIFFICULTY_CONFIGS } from '../config/difficulty';
 
 export default function GamePage() {
-  const { gameState, setGameState, refreshStats } = useGameContext();
+  const { gameState, setGameState, refreshStats, difficulty } = useGameContext();
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
