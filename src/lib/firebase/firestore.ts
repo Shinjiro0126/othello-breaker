@@ -24,14 +24,19 @@ const COLLECTION_NAME = 'gameResults';
  */
 export async function saveGameResult(result: Omit<GameResult, 'timestamp'>): Promise<string | null> {
   try {
+    console.log('Attempting to save game result to Firestore...', result);
     const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...result,
       timestamp: Timestamp.now(),
     });
-    console.log('Game result saved with ID:', docRef.id);
+    console.log('✓ Game result saved successfully with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error saving game result:', error);
+    console.error('✗ Error saving game result to Firestore:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return null;
   }
 }
