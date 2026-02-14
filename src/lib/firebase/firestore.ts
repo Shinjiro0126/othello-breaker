@@ -15,6 +15,7 @@ export interface GameResult {
   blackScore: number;
   whiteScore: number;
   totalMoves: number;
+  difficulty?: 'beginner' | 'normal' | 'hard' | 'master';
 }
 
 const COLLECTION_NAME = 'gameResults';

@@ -4,6 +4,9 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import { OthelloGame } from '../utils/othelloGame';
+import VictoryAnimation from '../components/VictoryAnimation';
+import { LooseAnimation } from '../components/LooseAnimation';
+import TieAnimation from '../components/TieAnimation';
 
 export default function ResultPage() {
   const { gameState, startNewGame } = useGameContext();
@@ -20,53 +23,70 @@ export default function ResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg">
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-8">
+      {/* 背景画像 */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/background.jpg')`,
+        }}
+      />
+      {/* オーバーレイ */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      
+      {/* 浮遊する円形装飾 */}
+      <div className="absolute top-10 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl animate-float-delayed" />
+      
+      <div className="w-xl max-w-xl mx-auto px-4 relative z-10">
+        <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl border border-white/20 animate-fade-in">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">ゲーム終了！</h1>
+            <h1 className="text-xl sm:text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム終了！</h1>
             
+
+
+
             {winner === 'B' && (
-              <div className="text-6xl mb-4">🎉</div>
+              <div className="text-8xl"><VictoryAnimation /></div>
             )}
             {winner === 'W' && (
-              <div className="text-6xl mb-4">😤</div>
+              <div className="text-8xl"><LooseAnimation /></div>
             )}
             {winner === 'tie' && (
-              <div className="text-6xl mb-4">🤝</div>
+              <div className="text-8xl"><TieAnimation /></div>
             )}
 
-            <div className="text-3xl font-bold mb-6">
-              {winner === 'B' && <span className="text-green-600">あなたの勝利です！</span>}
-              {winner === 'W' && <span className="text-red-600">CPUの勝利です</span>}
-              {winner === 'tie' && <span className="text-gray-600">引き分けです</span>}
+            <div className="font-bold mb-6 drop-shadow-lg">
+              {winner === 'B' && <span className="text-green-300 text-2xl font-bold">あなたの勝利です！</span>}
+              {winner === 'W' && <span className="text-red-400 text-2xl font-bold">CPUの勝利です</span>}
+              {winner === 'tie' && <span className="text-yellow-300 text-2xl font-bold">引き分けです</span>}
             </div>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">最終スコア</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-800 p-6 rounded-lg text-white">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-black rounded-full border-2 border-gray-400"></div>
-                  <span className="font-bold">あなた (黒)</span>
+            <h2 className="text-xl font-bold mb-6 text-center text-white drop-shadow-lg">最終スコア</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="backdrop-blur-md bg-gradient-to-br from-gray-800/60 to-black/60 py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
+                <div className="flex items-center justify-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
+                  <span className="font-bold text-white drop-shadow-lg">あなた (黒)</span>
                 </div>
-                <div className="text-4xl font-bold text-center">{gameState.scores.black}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.black}</div>
               </div>
               
-              <div className="bg-blue-600 p-6 rounded-lg text-white">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="w-8 h-8 bg-white rounded-full border-2 border-gray-400"></div>
-                  <span className="font-bold">CPU (白)</span>
+              <div className="backdrop-blur-md py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
+                <div className="flex items-center justify-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
+                  <span className="font-bold text-white drop-shadow-lg">CPU (白)</span>
                 </div>
-                <div className="text-4xl font-bold text-center">{gameState.scores.white}</div>
+                <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.white}</div>
               </div>
             </div>
           </div>
 
           {winner === 'W' && (
-            <div className="bg-blue-50 p-4 rounded-lg mb-8 text-center">
-              <p className="text-sm text-gray-700">
+            <div className="backdrop-blur-md bg-blue-500/20 p-6 rounded-2xl mb-8 text-center border border-blue-300/30">
+              <p className="text-white/90 drop-shadow-lg">
                 CPUは強力ですが、時間制限により完璧ではありません。<br />
                 次の対局でもう一手先を読んでみましょう。
               </p>
@@ -74,24 +94,24 @@ export default function ResultPage() {
           )}
 
           {winner === 'B' && (
-            <div className="bg-green-50 p-4 rounded-lg mb-8 text-center">
-              <p className="text-sm text-gray-700">
+            <div className="backdrop-blur-md bg-green-500/20 p-6 rounded-2xl mb-8 text-center border border-green-300/30">
+              <p className="text-white/90 drop-shadow-lg">
                 素晴らしい！時間制限のあるCPUに勝利しました。<br />
                 この調子で連勝を目指しましょう！
               </p>
             </div>
           )}
 
-          <div className="flex gap-4 justify-center">
+          <div className="grid gap-4 w-full mx-auto">
             <button
               onClick={handleRematch}
-              className="px-8 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+              className="grid-cols d-block py-4 bg-gradient-to-r from-blue-400 via-blue-600 to-blue-500 text-white font-bold text-lg rounded-2xl hover:scale-102 transition-all duration-300 shadow-2xl hover:shadow-blue-500/50"
             >
               再戦する
             </button>
             <button
               onClick={handleBackToHome}
-              className="px-8 py-3 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 transition-colors shadow-lg"
+              className="grid-cols px-10 py-4 backdrop-blur-md bg-white/20 text-white font-bold text-lg rounded-2xl hover:bg-white/30 transition-all duration-300 shadow-xl border border-white/30"
             >
               トップへ戻る
             </button>

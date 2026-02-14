@@ -33,6 +33,7 @@ export default function GamePage() {
           blackScore: gameState.scores.black,
           whiteScore: gameState.scores.white,
           totalMoves,
+          difficulty: gameState.difficulty || difficulty,
         }).then(() => {
           // 保存成功後に統計を更新
           refreshStats();
@@ -230,26 +231,47 @@ export default function GamePage() {
   }, [gameState, setGameState]);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Othello Breaker</h1>
-          <p className="text-lg text-gray-600">
+    <div className="min-h-screen relative overflow-hidden py-8">
+      {/* 背景画像 */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/background.jpg')`,
+        }}
+      />
+      {/* オーバーレイ */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      
+      {/* 浮遊する円形装飾 */}
+      <div className="absolute top-20 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-float-delayed" />
+
+      <div className="max-w-6xl mx-auto px-4 relative z-10">
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">Othello Breaker</h1>
+          <div className="inline-block backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
+            <span className="text-white/90 text-sm font-medium drop-shadow-lg">
+              モード: {gameState.difficulty === 'beginner' ? '初級' : gameState.difficulty === 'normal' ? '中級' : gameState.difficulty === 'hard' ? '上級' : 'マスター'}
+            </span>
+          </div>
+          <p className="text-lg text-white/90 drop-shadow-lg">
             CPUは1秒で最善手を狙う強敵です。でも無敵ではありません。工夫次第で勝てます。
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
-          <div className="flex justify-center">
-            <OthelloBoard gameState={gameState} onCellClick={handleCellClick} />
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 items-start">
+          <div className="flex justify-center animate-slide-up w-full">
+            <div className="w-full max-w-[600px]">
+              <OthelloBoard gameState={gameState} onCellClick={handleCellClick} />
+            </div>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-6 animate-slide-up w-full" style={{animationDelay: '0.1s'}}>
             <ScoreBoard gameState={gameState} />
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">操作方法</h3>
-              <ul className="text-sm text-gray-600 space-y-1">
+            <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+              <h3 className="font-semibold mb-3 text-white text-lg drop-shadow-lg">操作方法</h3>
+              <ul className="text-sm text-white/90 space-y-2">
                 <li>• 黄色のマーカーが表示された場所をクリックして駒を置けます</li>
                 <li>• 赤い枠は直前に置かれた駒を示します</li>
                 <li>• 黒（あなた）が先手、白（CPU）が後手です</li>

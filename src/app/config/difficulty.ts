@@ -2,21 +2,21 @@ import type { DifficultyLevel, DifficultyConfig } from '../types/game';
 
 export const DIFFICULTY_CONFIGS: Record<DifficultyLevel, DifficultyConfig> = {
   beginner: {
-    maxDepth: 3,
+    maxDepth: 1,
     timeMs: 500,
     useIterativeDeepening: false,
     useEndgameSolver: false,
     endgameSolverThreshold: 0,
   },
   normal: {
-    maxDepth: 7,
+    maxDepth: 3,
     timeMs: 800,
     useIterativeDeepening: false,
     useEndgameSolver: false,
     endgameSolverThreshold: 0,
   },
   hard: {
-    maxDepth: 12,
+    maxDepth: 6,
     timeMs: 1000,
     useIterativeDeepening: true,
     useEndgameSolver: true,
@@ -32,10 +32,10 @@ export const DIFFICULTY_CONFIGS: Record<DifficultyLevel, DifficultyConfig> = {
 };
 
 export const DIFFICULTY_LABELS: Record<DifficultyLevel, string> = {
-  beginner: 'Beginner',
-  normal: 'Normal',
-  hard: 'Hard',
-  master: 'Master',
+  beginner: 'ビギナー',
+  normal: 'ノーマル',
+  hard: 'ハード',
+  master: 'マスター',
 };
 
 export const DIFFICULTY_DESCRIPTIONS: Record<DifficultyLevel, string> = {
