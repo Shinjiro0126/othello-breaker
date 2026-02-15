@@ -23,7 +23,7 @@ function ScoreBoard({ gameState }: ScoreBoardProps) {
             <span className={`font-bold text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/80'
             }`}>
-              あなた (黒)
+              CPU (黒)
             </span>
           </div>
           <span className={`font-bold text-3xl drop-shadow-lg ${
@@ -43,7 +43,7 @@ function ScoreBoard({ gameState }: ScoreBoardProps) {
             <span className={`font-bold text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/80'
             }`}>
-              CPU (白)
+              あなた (白)
             </span>
           </div>
           <span className={`font-bold text-3xl drop-shadow-lg ${
@@ -65,7 +65,7 @@ function ScoreBoard({ gameState }: ScoreBoardProps) {
       {gameState.gamePhase === 'playing' && !gameState.isThinking && (
         <div className="text-center p-4 bg-white/20 rounded-2xl mb-4 border border-white/30 backdrop-blur-md">
           <span className="font-medium text-white drop-shadow-lg text-lg">
-            {gameState.currentPlayer === 'B' ? '🎯 あなたの番です' : '⚡ CPUの番です'}
+            {gameState.currentPlayer === 'W' ? '🎯 あなたの番です' : '⚡ CPUの番です'}
           </span>
         </div>
       )}

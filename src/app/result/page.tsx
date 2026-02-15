@@ -46,10 +46,10 @@ export default function ResultPage() {
 
 
 
-            {winner === 'B' && (
+            {winner === 'W' && (
               <div className="text-8xl"><VictoryAnimation /></div>
             )}
-            {winner === 'W' && (
+            {winner === 'B' && (
               <div className="text-8xl"><LooseAnimation /></div>
             )}
             {winner === 'tie' && (
@@ -57,8 +57,8 @@ export default function ResultPage() {
             )}
 
             <div className="font-bold mb-6 drop-shadow-lg">
-              {winner === 'B' && <span className="text-green-300 text-2xl font-bold">あなたの勝利です！</span>}
-              {winner === 'W' && <span className="text-red-400 text-2xl font-bold">CPUの勝利です</span>}
+              {winner === 'W' && <span className="text-green-300 text-2xl font-bold">あなたの勝利です！</span>}
+              {winner === 'B' && <span className="text-red-400 text-2xl font-bold">CPUの勝利です</span>}
               {winner === 'tie' && <span className="text-yellow-300 text-2xl font-bold">引き分けです</span>}
             </div>
           </div>
@@ -69,7 +69,7 @@ export default function ResultPage() {
               <div className="backdrop-blur-md bg-gradient-to-br from-gray-800/60 to-black/60 py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
                 <div className="flex items-center justify-center space-x-3 mb-4">
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
-                  <span className="font-bold text-white drop-shadow-lg">あなた (黒)</span>
+                  <span className="font-bold text-white drop-shadow-lg">CPU (黒)</span>
                 </div>
                 <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.black}</div>
               </div>
@@ -77,14 +77,14 @@ export default function ResultPage() {
               <div className="backdrop-blur-md py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
                 <div className="flex items-center justify-center space-x-3 mb-4">
                   <div className="w-8 h-8 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
-                  <span className="font-bold text-white drop-shadow-lg">CPU (白)</span>
+                  <span className="font-bold text-white drop-shadow-lg">あなた (白)</span>
                 </div>
                 <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.white}</div>
               </div>
             </div>
           </div>
 
-          {winner === 'W' && (
+          {winner === 'B' && (
             <div className="backdrop-blur-md bg-blue-500/20 p-6 rounded-2xl mb-8 text-center border border-blue-300/30">
               <p className="text-white/90 drop-shadow-lg">
                 CPUは強力ですが、時間制限により完璧ではありません。<br />
@@ -93,7 +93,7 @@ export default function ResultPage() {
             </div>
           )}
 
-          {winner === 'B' && (
+          {winner === 'W' && (
             <div className="backdrop-blur-md bg-green-500/20 p-6 rounded-2xl mb-8 text-center border border-green-300/30">
               <p className="text-white/90 drop-shadow-lg">
                 素晴らしい！時間制限のあるCPUに勝利しました。<br />

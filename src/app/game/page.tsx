@@ -20,6 +20,19 @@ export default function GamePage() {
   // Get difficulty configuration
   const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
 
+  // ゲーム開始時の処理（メッセージ表示後にCPUが一手目を打つ）
+  useEffect(() => {
+    if (gameState.gamePhase === 'starting') {
+      const timer = setTimeout(() => {
+        setGameState(prev => ({
+          ...prev,
+          gamePhase: 'playing'
+        }));
+      }, 2000); // 2秒後にゲーム開始
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.gamePhase, setGameState]);
+
   // ゲーム終了時の統計更新と結果ページへの遷移
   useEffect(() => {
     if (gameState.gamePhase === 'gameOver' && !savedGameRef.current) {
@@ -34,6 +47,7 @@ export default function GamePage() {
           whiteScore: gameState.scores.white,
           totalMoves,
           difficulty: gameState.difficulty || difficulty,
+          playerWon: winner === 'W', // プレイヤー（白）が勝利したかどうか
         }).then(() => {
           // 保存成功後に統計を更新
           refreshStats();
@@ -88,9 +102,9 @@ export default function GamePage() {
     });
   }, [difficultyConfig]);
 
-  // CPU手番時の処理
+  // CPU手番時の処理（CPUは黒）
   useEffect(() => {
-    if (gameState.currentPlayer === 'W' && gameState.gamePhase === 'playing' && !gameState.isThinking) {
+    if (gameState.currentPlayer === 'B' && gameState.gamePhase === 'playing' && !gameState.isThinking) {
       generationRef.current++;
       const currentGen = generationRef.current;
 
@@ -100,18 +114,18 @@ export default function GamePage() {
         generationId: currentGen
       }));
 
-      thinkAsync(gameState.board, 'W', currentGen).then(({ move, gen }) => {
+      thinkAsync(gameState.board, 'B', currentGen).then(({ move, gen }) => {
         if (gen !== generationRef.current) {
           return;
         }
 
         setGameState(prevState => {
-          if (prevState.currentPlayer !== 'W' || prevState.isThinking === false) {
+          if (prevState.currentPlayer !== 'B' || prevState.isThinking === false) {
             return prevState;
           }
 
           if (move === null) {
-            const opponentMoves = OthelloGame.getValidMoves(prevState.board, 'B');
+            const opponentMoves = OthelloGame.getValidMoves(prevState.board, 'W');
             if (opponentMoves.length === 0) {
               return {
                 ...prevState,
@@ -122,21 +136,21 @@ export default function GamePage() {
             } else {
               return {
                 ...prevState,
-                currentPlayer: 'B',
+                currentPlayer: 'W',
                 validMoves: opponentMoves,
                 isThinking: false
               };
             }
           }
 
-          const newBoard = OthelloGame.makeMove(prevState.board, move, 'W');
+          const newBoard = OthelloGame.makeMove(prevState.board, move, 'B');
           if (!newBoard) return prevState;
 
           const newScores = OthelloGame.countPieces(newBoard);
-          const humanMoves = OthelloGame.getValidMoves(newBoard, 'B');
+          const humanMoves = OthelloGame.getValidMoves(newBoard, 'W');
           
           if (humanMoves.length === 0) {
-            const cpuMoves = OthelloGame.getValidMoves(newBoard, 'W');
+            const cpuMoves = OthelloGame.getValidMoves(newBoard, 'B');
             if (cpuMoves.length === 0) {
               return {
                 ...prevState,
@@ -155,7 +169,7 @@ export default function GamePage() {
                 board: newBoard,
                 scores: newScores,
                 lastMove: move,
-                currentPlayer: 'W',
+                currentPlayer: 'B',
                 validMoves: [],
                 isThinking: false
               };
@@ -165,7 +179,7 @@ export default function GamePage() {
           return {
             ...prevState,
             board: newBoard,
-            currentPlayer: 'B',
+            currentPlayer: 'W',
             scores: newScores,
             lastMove: move,
             validMoves: humanMoves,
@@ -178,22 +192,22 @@ export default function GamePage() {
 
   const handleCellClick = useCallback((index: number) => {
     if (gameState.gamePhase !== 'playing' || 
-        gameState.currentPlayer !== 'B' || 
+        gameState.currentPlayer !== 'W' || 
         gameState.isThinking ||
         !gameState.validMoves.includes(index)) {
       return;
     }
 
-    const newBoard = OthelloGame.makeMove(gameState.board, index, 'B');
+    const newBoard = OthelloGame.makeMove(gameState.board, index, 'W');
     if (!newBoard) return;
 
     generationRef.current++;
 
     const newScores = OthelloGame.countPieces(newBoard);
-    const cpuMoves = OthelloGame.getValidMoves(newBoard, 'W');
+    const cpuMoves = OthelloGame.getValidMoves(newBoard, 'B');
     
     if (cpuMoves.length === 0) {
-      const humanMoves = OthelloGame.getValidMoves(newBoard, 'B');
+      const humanMoves = OthelloGame.getValidMoves(newBoard, 'W');
       if (humanMoves.length === 0) {
         setGameState(prev => ({
           ...prev,
@@ -221,7 +235,7 @@ export default function GamePage() {
     setGameState(prev => ({
       ...prev,
       board: newBoard,
-      currentPlayer: 'W',
+      currentPlayer: 'B',
       scores: newScores,
       lastMove: index,
       validMoves: [],
@@ -247,11 +261,22 @@ export default function GamePage() {
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-float-delayed" />
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
+        {/* ゲーム開始メッセージ */}
+        {gameState.gamePhase === 'starting' && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-md">
+            <div className="backdrop-blur-xl bg-white/20 p-12 rounded-3xl shadow-2xl border-2 border-white/30 animate-fade-in text-center">
+              <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム開始！</h2>
+              <p className="text-2xl text-white/90 mb-2 drop-shadow-lg">あなたは後攻（白）です</p>
+              <p className="text-lg text-white/80 drop-shadow-md">CPUが先手を打ちます...</p>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">Othello Breaker</h1>
           <div className="inline-block backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
             <span className="text-white/90 text-sm font-medium drop-shadow-lg">
-              モード: {gameState.difficulty === 'beginner' ? '初級' : gameState.difficulty === 'normal' ? '中級' : gameState.difficulty === 'hard' ? '上級' : 'マスター'}
+              モード: {gameState.difficulty === 'beginner' ? 'ビギナー' : gameState.difficulty === 'normal' ? 'ノーマル' : gameState.difficulty === 'hard' ? 'ハード' : 'マスター'}
             </span>
           </div>
           <p className="text-lg text-white/90 drop-shadow-lg">
@@ -274,7 +299,7 @@ export default function GamePage() {
               <ul className="text-sm text-white/90 space-y-2">
                 <li>• 黄色のマーカーが表示された場所をクリックして駒を置けます</li>
                 <li>• 赤い枠は直前に置かれた駒を示します</li>
-                <li>• 黒（あなた）が先手、白（CPU）が後手です</li>
+                <li>• 白（あなた）が後手、黒（CPU）が先手です</li>
                 <li>• 置ける場所がない場合は自動的にパスされます</li>
               </ul>
             </div>

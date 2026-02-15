@@ -7,9 +7,13 @@ import type { DifficultyLevel } from './types/game';
 import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DIFFICULTY_CONFIGS } from './config/difficulty';
 
 export default function Home() {
-  const { stats, difficulty, startNewGame } = useGameContext();
+  const { getStatsByDifficulty, difficulty, startNewGame } = useGameContext();
   const router = useRouter();
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('normal');
+  const [statsFilter, setStatsFilter] = useState<DifficultyLevel | 'all'>('all');
+  
+  // フィルタされた統計を取得
+  const stats = getStatsByDifficulty(statsFilter === 'all' ? undefined : statsFilter);
 
   useEffect(() => {
     setSelectedDifficulty(difficulty);
@@ -51,7 +55,25 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl mb-4 sm:mb-0 border border-white/20 hover:bg-white/15 transition-all duration-300 animate-slide-up lg:col-span-1">
-            <h2 className="text-2xl font-bold text-white mb-6 drop-shadow-lg">対戦成績</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg">対戦成績</h2>
+            </div>
+            
+            {/* 難易度フィルタ */}
+            <div className="mb-6">
+              <select
+                value={statsFilter}
+                onChange={(e) => setStatsFilter(e.target.value as DifficultyLevel | 'all')}
+                className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all cursor-pointer"
+              >
+                <option value="all" className="bg-gray-800">全ての難易度</option>
+                <option value="beginner" className="bg-gray-800">ビギナー</option>
+                <option value="normal" className="bg-gray-800">ノーマル</option>
+                <option value="hard" className="bg-gray-800">ハード</option>
+                <option value="master" className="bg-gray-800">マスター</option>
+              </select>
+            </div>
+
             <div className='space-y-4'>
               <div className="backdrop-blur-md bg-gradient-to-br from-blue-800/20 to-blue-500/20 p-4 sm:p-6 rounded-2xl border border-white/20 hover:scale-105 transition-transform duration-300 text-center">
                 <div className="text-4xl font-bold text-yellow-400 drop-shadow-lg mb-2">

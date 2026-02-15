@@ -16,6 +16,7 @@ export interface GameResult {
   whiteScore: number;
   totalMoves: number;
   difficulty?: 'beginner' | 'normal' | 'hard' | 'master';
+  playerWon: boolean; // プレイヤー（白）が勝利したかどうか
 }
 
 const COLLECTION_NAME = 'gameResults';
@@ -62,6 +63,8 @@ export async function getRecentGameResults(count: number = 10): Promise<GameResu
         blackScore: data.blackScore,
         whiteScore: data.whiteScore,
         totalMoves: data.totalMoves,
+        difficulty: data.difficulty,
+        playerWon: data.playerWon ?? (data.winner === 'W'), // 互換性のため既存データも処理
       };
     });
   } catch (error) {
@@ -89,6 +92,8 @@ export async function getAllGameResults(): Promise<GameResult[]> {
         blackScore: data.blackScore,
         whiteScore: data.whiteScore,
         totalMoves: data.totalMoves,
+        difficulty: data.difficulty,
+        playerWon: data.playerWon ?? (data.winner === 'W'), // 互換性のため既存データも処理
       };
     });
   } catch (error) {
@@ -100,11 +105,16 @@ export async function getAllGameResults(): Promise<GameResult[]> {
 /**
  * 統計情報を計算
  */
-export function calculateStats(results: GameResult[]) {
-  const totalGames = results.length;
-  const wins = results.filter(r => r.winner === 'B').length;
-  const losses = results.filter(r => r.winner === 'W').length;
-  const ties = results.filter(r => r.winner === 'tie').length;
+export function calculateStats(results: GameResult[], difficulty?: 'beginner' | 'normal' | 'hard' | 'master') {
+  // 難易度でフィルタリング
+  const filteredResults = difficulty 
+    ? results.filter(r => r.difficulty === difficulty)
+    : results;
+  
+  const totalGames = filteredResults.length;
+  const wins = filteredResults.filter(r => r.playerWon).length; // プレイヤーの勝利
+  const losses = filteredResults.filter(r => !r.playerWon && r.winner !== 'tie').length;
+  const ties = filteredResults.filter(r => r.winner === 'tie').length;
   
   return {
     totalGames,

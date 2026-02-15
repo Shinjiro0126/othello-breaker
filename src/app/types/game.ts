@@ -14,7 +14,7 @@ export interface DifficultyConfig {
 export interface GameState {
   board: Piece[];
   currentPlayer: 'B' | 'W';
-  gamePhase: 'playing' | 'gameOver';
+  gamePhase: 'starting' | 'playing' | 'gameOver';
   scores: {
     black: number;
     white: number;

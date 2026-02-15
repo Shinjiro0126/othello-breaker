@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import type { GameState, DifficultyLevel } from '../types/game';
 import { OthelloGame } from '../utils/othelloGame';
 import { DEFAULT_DIFFICULTY } from '../config/difficulty';
-import { getAllGameResults, calculateStats } from '@/lib/firebase/firestore';
+import { getAllGameResults, calculateStats, GameResult } from '@/lib/firebase/firestore';
 
 interface GameStats {
   totalGames: number;
@@ -19,7 +19,9 @@ interface GameContextType {
   stats: GameStats;
   setStats: React.Dispatch<React.SetStateAction<GameStats>>;
   isLoadingStats: boolean;
-  refreshStats: () => Promise<void>;
+  refreshStats: (difficulty?: DifficultyLevel) => Promise<void>;
+  getStatsByDifficulty: (difficulty?: DifficultyLevel) => GameStats;
+  allResults: GameResult[]; // 全結果を保持
   difficulty: DifficultyLevel;
   setDifficulty: (difficulty: DifficultyLevel) => void;
   resetGame: () => void;
@@ -55,8 +57,8 @@ export function GameProvider({ children }: GameProviderProps) {
     const initialBoard = OthelloGame.createInitialBoard();
     return {
       board: initialBoard,
-      currentPlayer: 'B',
-      gamePhase: 'playing',
+      currentPlayer: 'B', // CPUが先攻（黒）
+      gamePhase: 'starting', // 開始メッセージ表示用
       scores: OthelloGame.countPieces(initialBoard),
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
@@ -73,20 +75,27 @@ export function GameProvider({ children }: GameProviderProps) {
     ties: 0
   });
 
+  const [allResults, setAllResults] = useState<GameResult[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   // Firestoreから統計を取得
-  const refreshStats = async () => {
+  const refreshStats = async (filterDifficulty?: DifficultyLevel) => {
     setIsLoadingStats(true);
     try {
       const results = await getAllGameResults();
-      const calculated = calculateStats(results);
+      setAllResults(results); // 全結果を保存
+      const calculated = calculateStats(results, filterDifficulty);
       setStats(calculated);
     } catch (error) {
       console.error('Failed to fetch stats from Firestore:', error);
     } finally {
       setIsLoadingStats(false);
     }
+  };
+
+  // 難易度別の統計を取得
+  const getStatsByDifficulty = (filterDifficulty?: DifficultyLevel): GameStats => {
+    return calculateStats(allResults, filterDifficulty);
   };
 
   // 初回マウント時に統計を取得
@@ -110,8 +119,8 @@ export function GameProvider({ children }: GameProviderProps) {
     const initialBoard = OthelloGame.createInitialBoard();
     setGameState({
       board: initialBoard,
-      currentPlayer: 'B',
-      gamePhase: 'playing',
+      currentPlayer: 'B', // CPUが先攻（黒）
+      gamePhase: 'starting', // 開始メッセージ表示用
       scores: OthelloGame.countPieces(initialBoard),
       lastMove: null,
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
@@ -129,7 +138,7 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   return (
-    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, isLoadingStats, refreshStats, difficulty, setDifficulty, resetGame, startNewGame }}>
+    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, isLoadingStats, refreshStats, getStatsByDifficulty, allResults, difficulty, setDifficulty, resetGame, startNewGame }}>
       {children}
     </GameContext.Provider>
   );

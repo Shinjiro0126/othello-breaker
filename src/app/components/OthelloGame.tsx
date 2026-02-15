@@ -216,6 +216,7 @@ const OthelloGameComponent: React.FC = () => {
           blackScore: gameState.scores.black,
           whiteScore: gameState.scores.white,
           totalMoves,
+          playerWon: winner === 'B', // このファイルでは黒がプレイヤー
         }).catch(error => {
           console.error('Failed to save game result to Firestore:', error);
         });
