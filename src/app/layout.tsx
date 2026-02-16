@@ -30,12 +30,8 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         {process.env.NODE_ENV === "production" && client && (
-          <Script
-            async
-            strategy="afterInteractive"
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
-            crossOrigin="anonymous"
-          />
+          <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
+            crossOrigin="anonymous"></script>
         )}
       </head>
       <body className="antialiased">
