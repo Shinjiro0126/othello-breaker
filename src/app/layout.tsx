@@ -29,10 +29,8 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        {process.env.NODE_ENV === "production" && client && (
-          <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
+        <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}`}
             crossOrigin="anonymous"></script>
-        )}
       </head>
       <body className="antialiased">
         <GameProvider>{children}</GameProvider>
