@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import { OthelloGame } from '../utils/othelloGame';
 import VictoryAnimation from '../components/VictoryAnimation';
-import LooseAnimation from '../components/LooseAnimation';
+import { LooseAnimation } from '../components/LooseAnimation';
 import TieAnimation from '../components/TieAnimation';
 import FixedBottomAd from '../components/FixedBottomAd';
 import AdsenseModal from '../components/AdsenseModal';
