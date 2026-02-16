@@ -16,11 +16,9 @@ export default function RootLayout({
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
   return (
-    <html lang="en">
-      <body className="antialiased">
-        <GameProvider>
-          {children}
-          {process.env.NODE_ENV === "production" && client && (
+    <html lang="ja">
+      <head>
+        {process.env.NODE_ENV === "production" && client && (
           <Script
             async
             strategy="afterInteractive"
@@ -28,7 +26,9 @@ export default function RootLayout({
             crossOrigin="anonymous"
           />
         )}
-        </GameProvider>
+      </head>
+      <body className="antialiased">
+        <GameProvider>{children}</GameProvider>
       </body>
     </html>
   );
