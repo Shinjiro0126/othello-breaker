@@ -6,6 +6,17 @@ import Script from "next/script";
 export const metadata: Metadata = {
   title: "Othello Breaker - AI対戦オセロゲーム",
   description: "強力なAIと対戦できるオセロゲーム。1秒制限の最強CPUに挑戦しよう！",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
 };
 
 export default function RootLayout({
