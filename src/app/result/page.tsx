@@ -1,26 +1,50 @@
 'use client';
 
-import React from 'react';
+import React, {useState} from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import { OthelloGame } from '../utils/othelloGame';
 import VictoryAnimation from '../components/VictoryAnimation';
 import { LooseAnimation } from '../components/LooseAnimation';
 import TieAnimation from '../components/TieAnimation';
+import FixedBottomAd from '../components/FixedBottomAd';
+import AdsenseModal from '../components/AdsenseModal';
 
 export default function ResultPage() {
   const { gameState, startNewGame } = useGameContext();
   const router = useRouter();
   const winner = OthelloGame.getWinner(gameState.board);
 
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<null | 'rematch' | 'home'>(null);
+
   const handleRematch = () => {
-    startNewGame();
-    router.push('/game');
+    setPendingAction('rematch');
+    setShowAdModal(true);
   };
 
   const handleBackToHome = () => {
-    router.push('/');
+    setPendingAction('home');
+    setShowAdModal(true);
   };
+
+  const handleAdComplete = () => {
+    setShowAdModal(false);
+
+    if(pendingAction === 'rematch') {
+      startNewGame();
+      router.push('/game');
+    } else if (pendingAction === 'home') {
+      router.push('/');
+    }
+
+    setPendingAction(null);
+  }
+
+  const handleCloseModal = () => {
+    setShowAdModal(false);
+    setPendingAction(null);
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-8">
@@ -42,9 +66,6 @@ export default function ResultPage() {
         <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl border border-white/20 animate-fade-in">
           <div className="text-center mb-8">
             <h1 className="text-xl sm:text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム終了！</h1>
-            
-
-
 
             {winner === 'W' && (
               <div className="text-8xl"><VictoryAnimation /></div>
@@ -118,6 +139,15 @@ export default function ResultPage() {
           </div>
         </div>
       </div>
+
+      <FixedBottomAd />
+
+      {/* 広告モーダル */}
+      <AdsenseModal
+        isOpen={showAdModal}
+        onClose={handleCloseModal}
+        onAdComplete={handleAdComplete}
+      />
     </div>
   );
 }
