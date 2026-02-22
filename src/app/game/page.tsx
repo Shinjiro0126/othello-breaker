@@ -20,6 +20,7 @@ export default function GamePage() {
   const [showBreakFlash, setShowBreakFlash] = useState(false);
   const [showBreakText, setShowBreakText] = useState(false);
   const [showBreakCpuResume, setShowBreakCpuResume] = useState(false);
+  const [showBreakConfirm, setShowBreakConfirm] = useState(false);
 
   // Get difficulty configuration
   const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
@@ -269,14 +270,21 @@ export default function GamePage() {
     return '発動可能！';
   };
 
-  // Break button click handler: enter break selection mode
+  // Break button click handler: show confirmation modal first
   const handleBreakClick = useCallback(() => {
     if (!breakAvailable) return;
+    setShowBreakConfirm(true);
+  }, [breakAvailable]);
+
+  // Confirmed from modal: enter break selection mode
+  const handleBreakConfirm = useCallback(() => {
+    setShowBreakConfirm(false);
     setIsBreakSelecting(true);
-  }, [breakAvailable, setIsBreakSelecting]);
+  }, [setIsBreakSelecting]);
 
   // Cancel break selection
   const handleBreakCancel = useCallback(() => {
+    setShowBreakConfirm(false);
     setIsBreakSelecting(false);
   }, [setIsBreakSelecting]);
 
@@ -367,6 +375,39 @@ export default function GamePage() {
 
       {/* Break selection modal overlay */}
       {/* (removed – selection now happens on the main board below) */}
+
+      {/* Break confirmation / explanation modal */}
+      {showBreakConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="backdrop-blur-xl bg-white/10 p-8 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in text-center max-w-sm w-full mx-4">
+            <div className="text-4xl mb-3">⚡</div>
+            <h2 className="text-2xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] mb-4">
+              Break Mode
+            </h2>
+            <ul className="text-white/90 text-sm text-left space-y-2 mb-6 bg-white/5 rounded-2xl p-4 border border-white/10">
+              <li>• <strong className="font-bold text-yellow-300">1ゲームに1回</strong>だけ使える必殺技です</li>
+              <li>• CPUの<strong className="font-bold text-yellow-300">角以外</strong>のコマを1つ選んで、<strong className="font-bold text-yellow-300">自分の色に変えます</strong></li>
+              <li>• 使用後は<strong className="font-bold text-yellow-300">即ターン終了</strong>でCPUの番になります</li>
+              <li>• 通常の石の反転は<strong className="font-bold text-white/70">起こりません</strong>（選んだ1マスのみ変化）</li>
+            </ul>
+            <p className="text-white/70 text-xs mb-6">本当に発動しますか？</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleBreakCancel}
+                className="flex-1 px-4 py-3 rounded-2xl border border-white/30 text-white/80 hover:text-white hover:border-white/60 transition-all text-sm font-medium"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleBreakConfirm}
+                className="flex-1 px-4 py-3 rounded-2xl bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 font-bold text-sm hover:scale-105 transition-all shadow-lg shadow-yellow-400/40"
+              >
+                ⚡ 発動する！
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         {/* ゲーム開始メッセージ */}
