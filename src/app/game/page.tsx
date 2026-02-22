@@ -366,33 +366,7 @@ export default function GamePage() {
       )}
 
       {/* Break selection modal overlay */}
-      {isBreakSelecting && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-          <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in w-full max-w-2xl">
-            <div className="text-center mb-4">
-              <h2 className="text-2xl sm:text-3xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] mb-1">
-                ⚡ BREAK MODE ⚡
-              </h2>
-              <p className="text-white/90 text-sm sm:text-base">相手のコマを1つ選択せよ</p>
-              <p className="text-white/60 text-xs mt-1">（角は選択不可）</p>
-            </div>
-            <OthelloBoard
-              gameState={gameState}
-              onCellClick={() => {}}
-              isBreakSelecting={true}
-              onBreakSelect={handleBreakSelect}
-            />
-            <div className="text-center mt-4">
-              <button
-                onClick={handleBreakCancel}
-                className="px-6 py-2 rounded-xl border border-white/30 text-white/80 hover:text-white hover:border-white/60 transition-all text-sm"
-              >
-                キャンセル
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* (removed – selection now happens on the main board below) */}
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         {/* ゲーム開始メッセージ */}
@@ -428,7 +402,29 @@ export default function GamePage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 items-start">
           <div className="flex justify-center animate-slide-up w-full">
             <div className="w-full max-w-[600px]">
-              <OthelloBoard gameState={gameState} onCellClick={handleCellClick} />
+              {/* Break selection instruction banner */}
+              {isBreakSelecting && (
+                <div className="mb-3 p-3 rounded-2xl border-2 border-yellow-400/60 bg-yellow-400/10 backdrop-blur-md animate-fade-in flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-black text-yellow-300 text-sm sm:text-base drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">
+                      ⚡ BREAK MODE ⚡
+                    </div>
+                    <div className="text-white/80 text-xs mt-0.5">相手のコマを1つ選択せよ（角は選択不可）</div>
+                  </div>
+                  <button
+                    onClick={handleBreakCancel}
+                    className="shrink-0 px-4 py-1.5 rounded-xl border border-white/30 text-white/80 hover:text-white hover:border-white/60 transition-all text-xs"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              )}
+              <OthelloBoard
+                gameState={gameState}
+                onCellClick={handleCellClick}
+                isBreakSelecting={isBreakSelecting}
+                onBreakSelect={handleBreakSelect}
+              />
             </div>
           </div>
           
