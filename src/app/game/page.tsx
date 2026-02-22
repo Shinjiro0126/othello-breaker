@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import OthelloBoard from '../components/OthelloBoard';
@@ -13,13 +13,29 @@ import { DIFFICULTY_CONFIGS } from '../config/difficulty';
 import Image from 'next/image';
 
 export default function GamePage() {
-  const { gameState, setGameState, refreshStats, difficulty } = useGameContext();
+  const { gameState, setGameState, refreshStats, difficulty, breakModeEnabled, breakUsed, setBreakUsed, isBreakSelecting, setIsBreakSelecting } = useGameContext();
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
+  const [showBreakFlash, setShowBreakFlash] = useState(false);
+  const [showBreakText, setShowBreakText] = useState(false);
+  const [showBreakCpuResume, setShowBreakCpuResume] = useState(false);
 
   // Get difficulty configuration
   const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
+
+  // Compute remaining empty squares
+  const remainingSquares = 64 - gameState.scores.black - gameState.scores.white;
+
+  // Break available when: mode ON, not used, remaining ≤ 10, player's turn, game playing, not thinking, not already selecting
+  const breakAvailable =
+    breakModeEnabled &&
+    !breakUsed &&
+    remainingSquares <= 10 &&
+    gameState.currentPlayer === 'W' &&
+    gameState.gamePhase === 'playing' &&
+    !gameState.isThinking &&
+    !isBreakSelecting;
 
   // ゲーム開始時の処理（メッセージ表示後にCPUが一手目を打つ）
   useEffect(() => {
@@ -192,7 +208,7 @@ export default function GamePage() {
   }, [gameState.currentPlayer, gameState.gamePhase, gameState.isThinking, thinkAsync, setGameState]);
 
   const handleCellClick = useCallback((index: number) => {
-    if (gameState.gamePhase !== 'playing' || 
+    if (gameState.gamePhase !== 'playing' ||
         gameState.currentPlayer !== 'W' || 
         gameState.isThinking ||
         !gameState.validMoves.includes(index)) {
@@ -245,6 +261,69 @@ export default function GamePage() {
     }));
   }, [gameState, setGameState]);
 
+  // Break status message helper
+  const getBreakStatusMessage = () => {
+    if (breakUsed) return '使用済み';
+    if (remainingSquares > 10) return `残り${remainingSquares}マス（残り10マス以下で使用可能）`;
+    if (gameState.currentPlayer !== 'W') return '自分のターン中のみ使用可能';
+    return '発動可能！';
+  };
+
+  // Break button click handler: enter break selection mode
+  const handleBreakClick = useCallback(() => {
+    if (!breakAvailable) return;
+    setIsBreakSelecting(true);
+  }, [breakAvailable, setIsBreakSelecting]);
+
+  // Cancel break selection
+  const handleBreakCancel = useCallback(() => {
+    setIsBreakSelecting(false);
+  }, [setIsBreakSelecting]);
+
+  // Break piece selection handler
+  const handleBreakSelect = useCallback((index: number) => {
+    if (!isBreakSelecting) return;
+    // Convert the selected black piece to white
+    const newBoard = [...gameState.board];
+    newBoard[index] = 'W';
+    const newScores = OthelloGame.countPieces(newBoard);
+    generationRef.current++;
+
+    setBreakUsed(true);
+    setIsBreakSelecting(false);
+
+    // Show flash effect then break text, then CPU resume message
+    setShowBreakFlash(true);
+    setShowBreakText(true);
+
+    const flashTimer = setTimeout(() => setShowBreakFlash(false), 300);
+
+    const textTimer = setTimeout(() => {
+      setShowBreakText(false);
+      setShowBreakCpuResume(true);
+    }, 1200);
+
+    const resumeTimer = setTimeout(() => {
+      setShowBreakCpuResume(false);
+      setGameState(prev => ({
+        ...prev,
+        board: newBoard,
+        currentPlayer: 'B',
+        scores: newScores,
+        lastMove: index,
+        validMoves: [],
+        isThinking: false,
+        generationId: generationRef.current
+      }));
+    }, 2700);
+
+    return () => {
+      clearTimeout(flashTimer);
+      clearTimeout(textTimer);
+      clearTimeout(resumeTimer);
+    };
+  }, [isBreakSelecting, gameState.board, setBreakUsed, setIsBreakSelecting, setGameState]);
+
   return (
     <div className="min-h-screen relative overflow-hidden py-8">
       {/* 背景画像 */}
@@ -260,6 +339,60 @@ export default function GamePage() {
       {/* 浮遊する円形装飾 */}
       <div className="absolute top-20 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl animate-float-delayed" />
+
+      {/* Break flash overlay */}
+      {showBreakFlash && (
+        <div className="fixed inset-0 z-[100] bg-yellow-200/80 pointer-events-none animate-screen-flash" />
+      )}
+
+      {/* Break executed text */}
+      {showBreakText && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center pointer-events-none">
+          <div className="text-4xl sm:text-6xl font-black text-yellow-300 drop-shadow-[0_0_30px_rgba(251,191,36,1)] animate-break-text text-center">
+            ⚡ 盤面を破壊した！ ⚡
+          </div>
+        </div>
+      )}
+
+      {/* Break CPU resume message */}
+      {showBreakCpuResume && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="backdrop-blur-xl bg-white/20 p-8 rounded-3xl shadow-2xl border-2 border-yellow-400/40 animate-fade-in text-center max-w-sm mx-4">
+            <div className="text-3xl mb-3">⚡</div>
+            <h2 className="text-2xl font-bold text-yellow-300 mb-2 drop-shadow-2xl">Break 発動！</h2>
+            <p className="text-white/90 drop-shadow-lg">CPUのターンで再開します...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Break selection modal overlay */}
+      {isBreakSelecting && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+          <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in w-full max-w-2xl">
+            <div className="text-center mb-4">
+              <h2 className="text-2xl sm:text-3xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] mb-1">
+                ⚡ BREAK MODE ⚡
+              </h2>
+              <p className="text-white/90 text-sm sm:text-base">相手のコマを1つ選択せよ</p>
+              <p className="text-white/60 text-xs mt-1">（角は選択不可）</p>
+            </div>
+            <OthelloBoard
+              gameState={gameState}
+              onCellClick={() => {}}
+              isBreakSelecting={true}
+              onBreakSelect={handleBreakSelect}
+            />
+            <div className="text-center mt-4">
+              <button
+                onClick={handleBreakCancel}
+                className="px-6 py-2 rounded-xl border border-white/30 text-white/80 hover:text-white hover:border-white/60 transition-all text-sm"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         {/* ゲーム開始メッセージ */}
@@ -279,10 +412,13 @@ export default function GamePage() {
 
         <div className="text-center mb-8 animate-fade-in">
           <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">Othello Breaker</h1>
-          <div className="inline-block backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
+          <div className="inline-flex gap-3 items-center backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
             <span className="text-white/90 text-sm font-medium drop-shadow-lg">
               モード: {gameState.difficulty === 'beginner' ? 'ビギナー' : gameState.difficulty === 'normal' ? 'ノーマル' : gameState.difficulty === 'hard' ? 'ハード' : 'マスター'}
             </span>
+            {breakModeEnabled && (
+              <span className="text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 px-2 py-0.5 rounded-full">⚡ Break Mode</span>
+            )}
           </div>
           <p className="text-lg text-white/90 drop-shadow-lg">
             CPUは1秒で最善手を狙う強敵です。でも無敵ではありません。工夫次第で勝てます。
@@ -298,6 +434,30 @@ export default function GamePage() {
           
           <div className="space-y-6 animate-slide-up w-full" style={{animationDelay: '0.1s'}}>
             <ScoreBoard gameState={gameState} />
+
+            {/* Break button (shown only when Break Mode is ON) */}
+            {breakModeEnabled && (
+              <div className="backdrop-blur-xl bg-white/10 p-4 rounded-3xl border border-white/20">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="font-bold text-white text-sm drop-shadow-md">⚡ Break Mode</div>
+                    <div className="text-xs text-white/60 mt-0.5">{getBreakStatusMessage()}</div>
+                  </div>
+                  <button
+                    onClick={handleBreakClick}
+                    disabled={!breakAvailable}
+                    title={!breakAvailable ? '残り10マス以下で使用可能' : 'Breakを発動する'}
+                    className={`px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+                      breakAvailable
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-105 animate-break-pulse cursor-pointer'
+                        : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
+                    }`}
+                  >
+                    ⚡ Break
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
               <h3 className="font-semibold mb-3 text-white text-lg drop-shadow-lg">操作方法</h3>

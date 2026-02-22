@@ -6,6 +6,8 @@ import { OthelloGame } from '../utils/othelloGame';
 import { DEFAULT_DIFFICULTY } from '../config/difficulty';
 import { getAllGameResults, calculateStats, GameResult } from '@/lib/firebase/firestore';
 
+const BREAK_MODE_STORAGE_KEY = 'othello-break-mode';
+
 interface GameStats {
   totalGames: number;
   wins: number;
@@ -26,6 +28,13 @@ interface GameContextType {
   setDifficulty: (difficulty: DifficultyLevel) => void;
   resetGame: () => void;
   startNewGame: (difficulty?: DifficultyLevel) => void;
+  // Break Mode
+  breakModeEnabled: boolean;
+  setBreakModeEnabled: (enabled: boolean) => void;
+  breakUsed: boolean;
+  setBreakUsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isBreakSelecting: boolean;
+  setIsBreakSelecting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -78,6 +87,16 @@ export function GameProvider({ children }: GameProviderProps) {
   const [allResults, setAllResults] = useState<GameResult[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
+  // Break Mode state
+  const [breakModeEnabled, setBreakModeEnabledState] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(BREAK_MODE_STORAGE_KEY) === 'true';
+    }
+    return false;
+  });
+  const [breakUsed, setBreakUsed] = useState(false);
+  const [isBreakSelecting, setIsBreakSelecting] = useState(false);
+
   // Firestoreから統計を取得
   const refreshStats = async (filterDifficulty?: DifficultyLevel) => {
     setIsLoadingStats(true);
@@ -103,6 +122,13 @@ export function GameProvider({ children }: GameProviderProps) {
     refreshStats();
   }, []);
 
+  const setBreakModeEnabled = (enabled: boolean) => {
+    setBreakModeEnabledState(enabled);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(BREAK_MODE_STORAGE_KEY, String(enabled));
+    }
+  };
+
   // Save difficulty to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -117,6 +143,8 @@ export function GameProvider({ children }: GameProviderProps) {
   const resetGame = (newDifficulty?: DifficultyLevel) => {
     const useDifficulty = newDifficulty || difficulty;
     const initialBoard = OthelloGame.createInitialBoard();
+    setBreakUsed(false);
+    setIsBreakSelecting(false);
     setGameState({
       board: initialBoard,
       currentPlayer: 'B', // CPUが先攻（黒）
@@ -138,7 +166,7 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   return (
-    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, isLoadingStats, refreshStats, getStatsByDifficulty, allResults, difficulty, setDifficulty, resetGame, startNewGame }}>
+    <GameContext.Provider value={{ gameState, setGameState, stats, setStats, isLoadingStats, refreshStats, getStatsByDifficulty, allResults, difficulty, setDifficulty, resetGame, startNewGame, breakModeEnabled, setBreakModeEnabled, breakUsed, setBreakUsed, isBreakSelecting, setIsBreakSelecting }}>
       {children}
     </GameContext.Provider>
   );

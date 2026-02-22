@@ -101,3 +101,40 @@ body {
 .animate-slide-up {
   animation: slide-up 0.8s ease-out forwards;
 }
+
+/* Break Mode animations */
+@keyframes break-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px 2px rgba(251, 191, 36, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px 6px rgba(251, 191, 36, 1);
+    transform: scale(1.08);
+  }
+}
+
+@keyframes screen-flash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes break-text {
+  0% { opacity: 0; transform: scale(0.5); }
+  20% { opacity: 1; transform: scale(1.2); }
+  80% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+
+.animate-break-pulse {
+  animation: break-pulse 0.9s ease-in-out infinite;
+}
+
+.animate-screen-flash {
+  animation: screen-flash 0.3s ease-out forwards;
+}
+
+.animate-break-text {
+  animation: break-text 1.2s ease-out forwards;
+}

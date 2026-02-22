@@ -7,7 +7,7 @@ import type { DifficultyLevel } from './types/game';
 import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DIFFICULTY_CONFIGS } from './config/difficulty';
 
 export default function Home() {
-  const { getStatsByDifficulty, difficulty, startNewGame } = useGameContext();
+  const { getStatsByDifficulty, difficulty, startNewGame, breakModeEnabled, setBreakModeEnabled } = useGameContext();
   const router = useRouter();
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('normal');
   const [statsFilter, setStatsFilter] = useState<DifficultyLevel | 'all'>('all');
@@ -134,6 +134,27 @@ export default function Home() {
               </div>
 
               <div className="text-center animate-slide-up mt-8" style={{animationDelay: '0.2s'}}>
+                {/* Break Mode トグル */}
+                <div className="flex items-center justify-center gap-4 mb-6 p-4 rounded-2xl border border-white/20 backdrop-blur-md bg-white/10">
+                  <div className="flex-1 text-left">
+                    <div className="font-bold text-white drop-shadow-md flex items-center gap-2">
+                      ⚡ Break Mode
+                      {breakModeEnabled && <span className="text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 px-2 py-0.5 rounded-full">ON</span>}
+                    </div>
+                    <div className="text-xs text-white/70 mt-1">終盤（残り10マス以下）に相手のコマを1つ強制変換できる必殺技</div>
+                  </div>
+                  <button
+                    onClick={() => setBreakModeEnabled(!breakModeEnabled)}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 ${
+                      breakModeEnabled
+                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 shadow-lg shadow-yellow-400/40'
+                        : 'bg-white/20 border border-white/30'
+                    }`}
+                    aria-label="Break Modeのオン/オフ切り替え"
+                  >
+                    <span className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${breakModeEnabled ? 'left-7' : 'left-0.5'}`} />
+                  </button>
+                </div>
                 <button
                   onClick={handleStartGame}
                   className="group relative px-10 py-5 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white font-bold text-xl rounded-2xl hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-purple-500/50 overflow-hidden"
