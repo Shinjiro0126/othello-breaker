@@ -10,6 +10,7 @@ import { OthelloAI } from '../ai/othelloAI';
 import type { Piece } from '../types/game';
 import { saveGameResult } from '@/lib/firebase/firestore';
 import { DIFFICULTY_CONFIGS } from '../config/difficulty';
+import Image from 'next/image';
 
 export default function GamePage() {
   const { gameState, setGameState, refreshStats, difficulty } = useGameContext();
@@ -264,8 +265,12 @@ export default function GamePage() {
         {/* ゲーム開始メッセージ */}
         {gameState.gamePhase === 'starting' && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-md">
-            <div className="backdrop-blur-xl bg-white/20 p-12 rounded-3xl shadow-2xl border-2 border-white/30 animate-fade-in text-center">
-              <h2 className="text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム開始！</h2>
+
+            <div className="backdrop-blur-xl bg-white/20 p-6 sm:p-12 rounded-3xl shadow-2xl border-2 border-white/30 animate-fade-in text-center">
+              <div className='flex justify-center mb-4'>
+                <Image src="/men.png" alt="あなたを表す男の子のイラスト" width={100} height={100} className="animate-pulse" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム開始！</h2>
               <p className="text-2xl text-white/90 mb-2 drop-shadow-lg">あなたは後攻（白）です</p>
               <p className="text-lg text-white/80 drop-shadow-md">CPUが先手を打ちます...</p>
             </div>

@@ -161,6 +161,30 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* フッター */}
+        <footer className="mt-12 text-center animate-fade-in" style={{animationDelay: '0.4s'}}>
+          <div className="backdrop-blur-md bg-white/10 p-6 rounded-2xl border border-white/20">
+            <div className="flex flex-wrap justify-center gap-6 text-white/90 text-sm">
+              <a 
+                href="/about" 
+                className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white"
+              >
+                このサイトについて
+              </a>
+              <span className="text-white/40">|</span>
+              <a 
+                href="/privacy" 
+                className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white"
+              >
+                プライバシーポリシー
+              </a>
+            </div>
+            <p className="mt-3 text-white/70 text-xs">
+              © 2026 Othello Breaker. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );

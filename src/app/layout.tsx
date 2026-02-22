@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     default: "Othello Breaker - AI対戦オセロゲーム | 無料ブラウザゲーム",
     template: "%s | Othello Breaker"
   },
-  description: "強力なAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。ブラウザで今すぐプレイ可能。",
+  description: "強力すぎるAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。ブラウザで今すぐプレイ可能。",
   keywords: ["オセロ", "リバーシ", "AI対戦", "ブラウザゲーム", "無料ゲーム", "戦略ゲーム", "ボードゲーム", "CPU対戦", "オンラインゲーム"],
   authors: [{ name: "Othello Breaker" }],
   creator: "Othello Breaker",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Othello Breaker - AI対戦オセロゲーム",
-    description: "強力なAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。",
+    description: "強力すぎるAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。",
     url: "https://othello-breaker.web.app",
     siteName: "Othello Breaker",
     locale: "ja_JP",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Othello Breaker - AI対戦オセロゲーム",
-    description: "強力なAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！",
+    description: "強力すぎるAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！",
     images: ["/og-image.png"],
   },
   verification: {
@@ -86,7 +86,7 @@ export default function RootLayout({
               "name": "Othello Breaker",
               "applicationCategory": "GameApplication",
               "genre": "Strategy Game",
-              "description": "強力なAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。",
+              "description": "強力すぎるAIと対戦できる無料オセロゲーム。1秒制限の最強CPUに挑戦！初心者から上級者まで楽しめる4つの難易度。",
               "url": "https://othello-breaker.web.app",
               "operatingSystem": "Web Browser",
               "offers": {
@@ -96,7 +96,7 @@ export default function RootLayout({
               },
               "featureList": [
                 "4段階の難易度設定（ビギナー、ノーマル、ハード、マスター）",
-                "強力なAI対戦",
+                "強力すぎるAI対戦",
                 "対戦成績の記録",
                 "無料プレイ"
               ],

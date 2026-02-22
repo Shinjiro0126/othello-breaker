@@ -62,16 +62,16 @@ export default function ResultPage() {
       <div className="absolute top-10 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl animate-float-delayed" />
       
-      <div className="w-xl max-w-xl mx-auto px-4 relative z-10">
+      <div className="w-xl max-w-xl mx-auto px-4 relative z-10 mb-24">
         <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl border border-white/20 animate-fade-in">
           <div className="text-center mb-8">
             <h1 className="text-xl sm:text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム終了！</h1>
 
             {winner === 'W' && (
-              <div className="text-8xl"><VictoryAnimation /></div>
+              <div className="text-8xl mb-4"><VictoryAnimation /></div>
             )}
             {winner === 'B' && (
-              <div className="text-8xl"><LooseAnimation /></div>
+              <div className="text-8xl mb-4"><LooseAnimation /></div>
             )}
             {winner === 'tie' && (
               <div className="text-8xl"><TieAnimation /></div>

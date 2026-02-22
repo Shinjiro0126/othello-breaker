@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   output: "export",
   compress: true,
   poweredByHeader: false,
+  images: {
+    unoptimized: true,
+  },
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
