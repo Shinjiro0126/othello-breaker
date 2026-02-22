@@ -87,15 +87,18 @@ export function GameProvider({ children }: GameProviderProps) {
   const [allResults, setAllResults] = useState<GameResult[]>([]);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
-  // Break Mode state
-  const [breakModeEnabled, setBreakModeEnabledState] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(BREAK_MODE_STORAGE_KEY) === 'true';
-    }
-    return false;
-  });
+  // Break Mode state - 初期値はfalseに固定してHydrationエラーを防ぐ
+  const [breakModeEnabled, setBreakModeEnabledState] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [breakUsed, setBreakUsed] = useState(false);
   const [isBreakSelecting, setIsBreakSelecting] = useState(false);
+
+  // クライアントサイドでマウント後にローカルストレージから値を読み込む
+  useEffect(() => {
+    setIsMounted(true);
+    const savedBreakMode = localStorage.getItem(BREAK_MODE_STORAGE_KEY) === 'true';
+    setBreakModeEnabledState(savedBreakMode);
+  }, []);
 
   // Firestoreから統計を取得
   const refreshStats = async (filterDifficulty?: DifficultyLevel) => {
