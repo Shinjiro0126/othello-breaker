@@ -1,8 +1,22 @@
+'use client';
+
 import Link from "next/link";
+import { useEffect } from 'react';
+import { useAudio } from '../contexts/AudioContext';
+import AudioControl from '../components/AudioControl';
 
 export default function PrivacyPolicy() {
+  const { playBGM } = useAudio();
+
+  // ページ読み込み時にBGM再生
+  useEffect(() => {
+    playBGM('top');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-12 px-4">
+      <AudioControl />
       {/* 背景画像 */}
       <div 
         className="absolute inset-0 bg-cover bg-center"

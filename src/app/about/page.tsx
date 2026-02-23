@@ -1,8 +1,22 @@
+'use client';
+
 import Link from "next/link";
+import { useEffect } from 'react';
+import { useAudio } from '../contexts/AudioContext';
+import AudioControl from '../components/AudioControl';
 
 export default function About() {
+  const { playBGM } = useAudio();
+
+  // ページ読み込み時にBGM再生
+  useEffect(() => {
+    playBGM('top');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-12 px-4">
+      <AudioControl />
       {/* 背景画像 */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -28,52 +42,63 @@ export default function About() {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
-            このサイトについて
+            絶望からの逆転劇を、あなたの手で
           </h2>
-          <p className="text-white/90 leading-relaxed mb-4">
-            Othello Breaker
-            は、ブラウザで遊べるオセロゲームです。強力なAIと対戦して、あなたのオセロスキルを試してみましょう！
+          <p className="text-white/90 leading-relaxed mb-3">
+            <span className="text-yellow-300 font-bold">Othello Breaker</span>は、最強AIとの緊張感あふれる対戦に、必殺技「Break」による逆転の興奮を加えた、まったく新しいオセロ体験です。
+          </p>
+          <p className="text-white/90 leading-relaxed">
+            劣勢でも諦めない。終盤の一手が、全てを変える。それがOthello Breakerの世界です。
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-white mb-4 drop-shadow-lg">
-            主な機能
+            Othello Breakerの特徴
           </h2>
           <ul className="space-y-3">
             <li className="flex items-start">
-              <span className="text-blue-400 font-bold mr-3">●</span>
+              <span className="text-yellow-300 font-bold mr-3 text-xl">⚡</span>
               <div>
-                <h3 className="font-semibold text-white">AI対戦</h3>
+                <h3 className="font-semibold text-white">必殺技「Break」</h3>
                 <p className="text-white/90">
-                  3つの難易度レベル（簡単・普通・難しい）から選択可能
+                  1ゲームに1回だけ。終盤の劣勢を一瞬で覆す、運命を変える一手
                 </p>
               </div>
             </li>
             <li className="flex items-start">
               <span className="text-blue-400 font-bold mr-3">●</span>
               <div>
-                <h3 className="font-semibold text-white">リアルタイムスコア表示</h3>
+                <h3 className="font-semibold text-white">最強クラスのAI対戦</h3>
                 <p className="text-white/90">
-                  現在のスコアをリアルタイムで確認できます
+                  4つの難易度で、15手先まで読む高度な思考エンジンと対戦
                 </p>
               </div>
             </li>
             <li className="flex items-start">
               <span className="text-blue-400 font-bold mr-3">●</span>
               <div>
-                <h3 className="font-semibold text-white">勝敗記録</h3>
+                <h3 className="font-semibold text-white">臨場感あふれる演出</h3>
                 <p className="text-white/90">
-                  あなたの戦績を記録し、成長を追跡できます
+                  雷鳴が響くBreak演出、BGM・効果音で没入感のある対戦体験
                 </p>
               </div>
             </li>
             <li className="flex items-start">
               <span className="text-blue-400 font-bold mr-3">●</span>
               <div>
-                <h3 className="font-semibold text-white">レスポンシブデザイン</h3>
+                <h3 className="font-semibold text-white">詳細な戦績管理</h3>
                 <p className="text-white/90">
-                  スマートフォンからPCまで、あらゆるデバイスで快適にプレイ可能
+                  難易度別の勝率・戦績を記録し、あなたの成長を可視化
+                </p>
+              </div>
+            </li>
+            <li className="flex items-start">
+              <span className="text-blue-400 font-bold mr-3">●</span>
+              <div>
+                <h3 className="font-semibold text-white">全デバイス対応</h3>
+                <p className="text-white/90">
+                  スマホ、タブレット、PCで快適にプレイ可能
                 </p>
               </div>
             </li>
@@ -85,10 +110,11 @@ export default function About() {
             遊び方
           </h2>
           <ol className="list-decimal list-inside text-white/90 space-y-3 ml-4">
-            <li>トップページから難易度を選択してゲームを開始</li>
-            <li>盤面をクリック/タップして石を配置</li>
+            <li>トップページから難易度とBreak Modeを選択</li>
+            <li>盤面をクリック/タップして石を配置（あなたは白、CPUは黒）</li>
             <li>相手の石を挟んで自分の色に変えよう</li>
-            <li>最終的に石が多い方が勝利！</li>
+            <li className="text-yellow-300 font-semibold">残り10マス以下で「Break」発動可能！相手の石1つを強制変換</li>
+            <li>最終的に石が多い方が勝利。Breakで形勢逆転を狙え！</li>
           </ol>
         </section>
 

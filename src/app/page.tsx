@@ -1,13 +1,23 @@
 'use client';
 
 import { useGameContext } from './contexts/GameContext';
+import { useAudio } from './contexts/AudioContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import type { DifficultyLevel } from './types/game';
 import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DIFFICULTY_CONFIGS } from './config/difficulty';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
+
+// AudioControlは初回表示に不要なので遅延読み込み
+const AudioControl = dynamic(() => import('./components/AudioControl'), {
+  ssr: false,
+  loading: () => null
+});
 
 export default function Home() {
   const { getStatsByDifficulty, difficulty, startNewGame, breakModeEnabled, setBreakModeEnabled } = useGameContext();
+  const { playBGM } = useAudio();
   const router = useRouter();
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('normal');
   const [statsFilter, setStatsFilter] = useState<DifficultyLevel | 'all'>('all');
@@ -19,19 +29,40 @@ export default function Home() {
     setSelectedDifficulty(difficulty);
   }, [difficulty]);
 
+  // BGM再生の統合版（初回のみ）
+  useEffect(() => {
+    playBGM('top');
+    
+    // 自動再生失敗時のフォールバック
+    const handleFirstInteraction = () => {
+      playBGM('top');
+    };
+
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+    
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleStartGame = () => {
     startNewGame(selectedDifficulty);
     router.push('/game');
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-12">
-      {/* 背景画像 */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('/background.jpg')`,
-        }}
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-6 sm:py-12">
+      <AudioControl />
+      {/* 背景画像（最適化） */}
+      <Image
+        src="/background.jpg"
+        alt=""
+        fill
+        className="object-cover"
+        priority
+        quality={75}
+        sizes="100vw"
       />
       {/* オーバーレイ */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -42,14 +73,26 @@ export default function Home() {
       <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl animate-pulse" />
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
-        <div className="text-center mb-10 animate-fade-in">
-          <h1 className="text-6xl font-bold text-white mb-4 drop-shadow-2xl tracking-tight">
-            <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-              Othello Breaker
-            </span>
+        <div className="text-center mb-6 sm:mb-10 animate-fade-in">
+          <h1 className="text-6xl font-bold text-white mb-2 drop-shadow-2xl tracking-tight">
+            <Image 
+              src="/logo.png" 
+              alt="Othello Breaker" 
+              width={400} 
+              height={120} 
+              className="mx-auto" 
+              priority
+              quality={85}
+            />
           </h1>
-          <p className="text-lg text-white/90 mb-8 drop-shadow-lg">
-            CPUは1秒で最善手を狙う強敵です。<br/>でも無敵ではありません。工夫次第で勝てます。
+          <div className="text-xl sm:text-3xl text-yellow-300 font-bold mb-2 drop-shadow-lg animate-pulse flex items-center justify-center gap-2" style={{fontFamily: 'Stick, sans-serif'}}>
+            <span>⚡</span> 必殺技「Break」で<br className='sm:hidden' />絶望を希望に変えろ <span>⚡</span>
+          </div>
+          <p className="text-sm sm:text-lg text-white/90 mb-2 drop-shadow-lg">
+            高度なAI相手に劣勢でも、<br className='sm:hidden' />たった一手で形勢逆転。
+          </p>
+          <p className="text-sm sm:text-lg text-white/80 drop-shadow-lg">
+            あなたの戦略と「Break」が織りなす、<br className='sm:hidden' />新次元のオセロ体験。
           </p>
         </div>
 
@@ -77,7 +120,9 @@ export default function Home() {
             <div className='space-y-4'>
               <div className="backdrop-blur-md bg-gradient-to-br from-blue-800/20 to-blue-500/20 p-4 sm:p-6 rounded-2xl border border-white/20 hover:scale-105 transition-transform duration-300 text-center">
                 <div className="text-4xl font-bold text-yellow-400 drop-shadow-lg mb-2">
-                  {stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0}<span className='ml-1 text-lg'>%</span>
+                  {stats.totalGames > 0
+                    ? Math.round((stats.wins / stats.totalGames) * 1000) / 10
+                    : 0}<span className='ml-1 text-lg'>%</span>
                 </div>
                 <div className="text-sm text-white/80">勝率</div>
               </div>
@@ -141,7 +186,7 @@ export default function Home() {
                       ⚡ Break Mode
                       {breakModeEnabled && <span className="text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 px-2 py-0.5 rounded-full">ON</span>}
                     </div>
-                    <div className="text-xs text-white/70 mt-1">終盤（残り10マス以下）に相手のコマを1つ強制変換できる必殺技</div>
+                    <div className="text-xs text-white/70 mt-1">終盤の1手で盤面を破壊し、運命を変える究極の逆転劇</div>
                   </div>
                   <button
                     onClick={() => setBreakModeEnabled(!breakModeEnabled)}
@@ -167,12 +212,14 @@ export default function Home() {
 
 
             <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl mt-8 border border-white/20 hover:bg-white/15 transition-all duration-300 animate-slide-up" style={{animationDelay: '0.3s'}}>
-              <h3 className="font-semibold mb-3 text-white drop-shadow-lg">AIについて</h3>
+              <h3 className="font-semibold mb-3 text-white drop-shadow-lg flex items-center gap-2">
+                <span className="text-red-400">🤖</span> 最強の敵、だが無敵ではない
+              </h3>
               <div className="mb-4 text-sm text-white/90 space-y-2">
-                <p>このAIは<span className='text-blue-400 font-bold'>Negamax法</span>と<span className='text-blue-400 font-bold'>Alpha-Beta枝刈り</span>を使用し、 最大15手先まで読む高度な思考エンジンを搭載しています。</p>
-                <p>終盤（残り14マス以下）では完全読みを行い、必勝手順を見逃しません。</p>
+                <p>このAIは<span className='text-blue-400 font-bold'>最大15手先まで読む</span>高度な思考エンジン。終盤では完全読みを行い、必勝手順を見逃しません。</p>
+                <p className='text-yellow-300 font-semibold'>しかし時間制限が弱点。そして「Break」があなたにはある。</p>
               </div>
-              <h3 className='font-semibold mb-3 text-white drop-shadow-lg'>勝利のコツ</h3>
+              <h3 className='font-semibold mb-3 text-white drop-shadow-lg'>逆転への道</h3>
               <ul className="text-sm text-white/90 space-y-2">
                 <li>• <span className='font-bold text-blue-400'>角を取る</span> ：角は絶対に取り返されない最強の位置です（+100点）</li>
                 <li>• <span className='font-bold text-blue-400'>X打ちを避ける</span>：角の斜め隣は角を取られるリスクがあります（-30点）</li>

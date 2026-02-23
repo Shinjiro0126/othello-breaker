@@ -3,6 +3,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
+import { useAudio } from '../contexts/AudioContext';
+import AudioControl from '../components/AudioControl';
 import OthelloBoard from '../components/OthelloBoard';
 import ScoreBoard from '../components/ScoreBoard';
 import { OthelloGame } from '../utils/othelloGame';
@@ -14,6 +16,7 @@ import Image from 'next/image';
 
 export default function GamePage() {
   const { gameState, setGameState, refreshStats, difficulty, breakModeEnabled, breakUsed, setBreakUsed, isBreakSelecting, setIsBreakSelecting } = useGameContext();
+  const { playBGM, playEffect } = useAudio();
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
@@ -21,6 +24,7 @@ export default function GamePage() {
   const [showBreakText, setShowBreakText] = useState(false);
   const [showBreakCpuResume, setShowBreakCpuResume] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
+  const [brokenPieceIndex, setBrokenPieceIndex] = useState<number | null>(null);
 
   // Get difficulty configuration
   const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
@@ -37,6 +41,12 @@ export default function GamePage() {
     gameState.gamePhase === 'playing' &&
     !gameState.isThinking &&
     !isBreakSelecting;
+
+  // ゲーム画面を開いた時にBGMを再生（初回のみ）
+  useEffect(() => {
+    playBGM('game');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ゲーム開始時の処理（メッセージ表示後にCPUが一手目を打つ）
   useEffect(() => {
@@ -280,7 +290,10 @@ export default function GamePage() {
   const handleBreakConfirm = useCallback(() => {
     setShowBreakConfirm(false);
     setIsBreakSelecting(true);
-  }, [setIsBreakSelecting]);
+    // Break発動時にBGMをbreak.mp3に切り替え
+    playBGM('break');
+    setBreakUsed(true);
+  }, [setIsBreakSelecting, playBGM, setBreakUsed]);
 
   // Cancel break selection
   const handleBreakCancel = useCallback(() => {
@@ -297,8 +310,11 @@ export default function GamePage() {
     const newScores = OthelloGame.countPieces(newBoard);
     generationRef.current++;
 
-    setBreakUsed(true);
     setIsBreakSelecting(false);
+    setBrokenPieceIndex(index);
+
+    // Play thunder sound effect
+    playEffect('thunder');
 
     // Show flash effect then break text, then CPU resume message
     setShowBreakFlash(true);
@@ -309,7 +325,7 @@ export default function GamePage() {
     const textTimer = setTimeout(() => {
       setShowBreakText(false);
       setShowBreakCpuResume(true);
-    }, 1200);
+    }, 3500);
 
     const resumeTimer = setTimeout(() => {
       setShowBreakCpuResume(false);
@@ -323,17 +339,18 @@ export default function GamePage() {
         isThinking: false,
         generationId: generationRef.current
       }));
-    }, 2700);
+    }, 5000);
 
     return () => {
       clearTimeout(flashTimer);
       clearTimeout(textTimer);
       clearTimeout(resumeTimer);
     };
-  }, [isBreakSelecting, gameState.board, setBreakUsed, setIsBreakSelecting, setGameState]);
+  }, [isBreakSelecting, gameState.board, setIsBreakSelecting, setGameState, playEffect]);
 
   return (
     <div className="min-h-screen relative overflow-hidden py-8">
+      <AudioControl />
       {/* 背景画像 */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -355,9 +372,60 @@ export default function GamePage() {
 
       {/* Break executed text */}
       {showBreakText && (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center pointer-events-none">
-          <div className="text-4xl sm:text-6xl font-black text-yellow-300 drop-shadow-[0_0_30px_rgba(251,191,36,1)] animate-break-text text-center">
-            ⚡ 盤面を破壊した！ ⚡
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/90 backdrop-blur-sm">
+          {/* Lightning SVG animations */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{animation: 'lightning-strike 3.5s ease-in-out'}}>
+            {/* Lightning bolt 1 */}
+            <path
+              d="M 20% 0 L 18% 30% L 22% 30% L 15% 60%"
+              stroke="#facc15"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 1000,
+                strokeDashoffset: 1000,
+                animation: 'draw-lightning 0.3s ease-out forwards, flicker 0.1s 0.3s infinite'
+              }}
+            />
+            {/* Lightning bolt 2 */}
+            <path
+              d="M 50% 0 L 48% 25% L 52% 25% L 47% 50%"
+              stroke="#fef08a"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 1000,
+                strokeDashoffset: 1000,
+                animation: 'draw-lightning 0.25s 0.1s ease-out forwards, flicker 0.15s 0.35s infinite'
+              }}
+            />
+            {/* Lightning bolt 3 */}
+            <path
+              d="M 80% 0 L 78% 35% L 82% 35% L 77% 65%"
+              stroke="#facc15"
+              strokeWidth="3"
+              fill="none"
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 1000,
+                strokeDashoffset: 1000,
+                animation: 'draw-lightning 0.28s 0.2s ease-out forwards, flicker 0.12s 0.48s infinite'
+              }}
+            />
+          </svg>
+          
+          <div className="animate-break-text relative z-10">
+            <div className="text-5xl sm:text-7xl font-black text-yellow-300 drop-shadow-[0_0_40px_rgba(251,191,36,1)] text-center mb-4 animate-pulse">
+              ⚡⚡⚡
+            </div>
+            <div className="text-4xl sm:text-6xl font-black bg-gradient-to-r from-yellow-200 via-yellow-300 to-orange-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,191,36,1)] text-center animate-bounce">
+              盤面を破壊した！
+            </div>
+            <div className="text-3xl sm:text-5xl font-black text-yellow-400 drop-shadow-[0_0_30px_rgba(250,204,21,1)] text-center mt-4 animate-pulse">
+              BREAK!!
+            </div>
           </div>
         </div>
       )}
@@ -382,15 +450,15 @@ export default function GamePage() {
           <div className="backdrop-blur-xl bg-white/10 p-8 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in text-center max-w-sm w-full mx-4">
             <div className="text-4xl mb-3">⚡</div>
             <h2 className="text-2xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] mb-4">
-              Break Mode
+              必殺技「Break」発動
             </h2>
             <ul className="text-white/90 text-sm text-left space-y-2 mb-6 bg-white/5 rounded-2xl p-4 border border-white/10">
-              <li>• <strong className="font-bold text-yellow-300">1ゲームに1回</strong>だけ使える必殺技です</li>
-              <li>• CPUの<strong className="font-bold text-yellow-300">角以外</strong>のコマを1つ選んで、<strong className="font-bold text-yellow-300">自分の色に変えます</strong></li>
-              <li>• 使用後は<strong className="font-bold text-yellow-300">即ターン終了</strong>でCPUの番になります</li>
-              <li>• 通常の石の反転は<strong className="font-bold text-white/70">起こりません</strong>（選んだ1マスのみ変化）</li>
+              <li>• <strong className="font-bold text-yellow-300">1ゲームに1回だけ</strong>の絶対チャンス</li>
+              <li>• 相手の<strong className="font-bold text-yellow-300">角以外の石1つ</strong>を<strong className="font-bold text-yellow-300">強制変換</strong></li>
+              <li>• 使用後は<strong className="font-bold text-yellow-300">相手のターン</strong>に移行</li>
+              <li>• 通常の石の反転は<strong className="font-bold text-white/70">起こらない</strong>（選んだ石のみ変化）</li>
             </ul>
-            <p className="text-white/70 text-xs mb-6">本当に発動しますか？</p>
+            <p className="text-white/70 text-xs mb-6">この一手が、形勢を変える。本当に発動しますか？</p>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleBreakCancel}
@@ -436,7 +504,7 @@ export default function GamePage() {
             )}
           </div>
           <p className="text-lg text-white/90 drop-shadow-lg">
-            CPUは1秒で最善手を狙う強敵です。でも無敵ではありません。工夫次第で勝てます。
+            最強AIが相手。だが、あなたには「Break」がある。諦めない者が、逆転を掌る。
           </p>
         </div>
 
@@ -465,12 +533,20 @@ export default function GamePage() {
                 onCellClick={handleCellClick}
                 isBreakSelecting={isBreakSelecting}
                 onBreakSelect={handleBreakSelect}
+                brokenPieceIndex={brokenPieceIndex}
               />
             </div>
           </div>
           
           <div className="space-y-6 animate-slide-up w-full" style={{animationDelay: '0.1s'}}>
-            <ScoreBoard gameState={gameState} />
+            <ScoreBoard 
+              gameState={gameState}
+              breakModeEnabled={breakModeEnabled}
+              breakUsed={breakUsed}
+              breakAvailable={breakAvailable}
+              remainingSquares={remainingSquares}
+              onBreakClick={handleBreakClick}
+            />
 
             <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300 hidden xl:block">
               <h3 className="font-semibold mb-3 text-white text-lg drop-shadow-lg">操作方法</h3>

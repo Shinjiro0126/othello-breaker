@@ -57,9 +57,16 @@ export function GameProvider({ children }: GameProviderProps) {
 
   // クライアントサイドでマウント後にlocalStorageから読み込む
   useEffect(() => {
-    const saved = localStorage.getItem('othello-difficulty');
-    if (saved && ['beginner', 'normal', 'hard', 'master'].includes(saved)) {
-      setDifficultyState(saved as DifficultyLevel);
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const saved = localStorage.getItem('othello-difficulty');
+      // データ検証：有効な難易度かどうかチェック
+      if (saved && ['beginner', 'normal', 'hard', 'master'].includes(saved)) {
+        setDifficultyState(saved as DifficultyLevel);
+      }
+    } catch (error) {
+      console.error('Failed to load difficulty:', error);
     }
   }, []);
 
@@ -105,8 +112,17 @@ export function GameProvider({ children }: GameProviderProps) {
   // クライアントサイドでマウント後にローカルストレージから値を読み込む
   useEffect(() => {
     setIsMounted(true);
-    const savedBreakMode = localStorage.getItem(BREAK_MODE_STORAGE_KEY) === 'true';
-    setBreakModeEnabledState(savedBreakMode);
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const savedBreakMode = localStorage.getItem(BREAK_MODE_STORAGE_KEY);
+      // データ検証：true/falseのみ受け入れる
+      if (savedBreakMode === 'true' || savedBreakMode === 'false') {
+        setBreakModeEnabledState(savedBreakMode === 'true');
+      }
+    } catch (error) {
+      console.error('Failed to load break mode:', error);
+    }
   }, []);
 
   // Firestoreから統計を取得
@@ -137,14 +153,22 @@ export function GameProvider({ children }: GameProviderProps) {
   const setBreakModeEnabled = (enabled: boolean) => {
     setBreakModeEnabledState(enabled);
     if (typeof window !== 'undefined') {
-      localStorage.setItem(BREAK_MODE_STORAGE_KEY, String(enabled));
+      try {
+        localStorage.setItem(BREAK_MODE_STORAGE_KEY, String(enabled));
+      } catch (error) {
+        console.error('Failed to save break mode:', error);
+      }
     }
   };
 
   // Save difficulty to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('othello-difficulty', difficulty);
+      try {
+        localStorage.setItem('othello-difficulty', difficulty);
+      } catch (error) {
+        console.error('Failed to save difficulty:', error);
+      }
     }
   }, [difficulty]);
 

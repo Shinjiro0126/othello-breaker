@@ -127,6 +127,24 @@ body {
   100% { opacity: 0; transform: scale(1); }
 }
 
+@keyframes draw-lightning {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes lightning-strike {
+  0% { opacity: 0; }
+  5% { opacity: 1; }
+  95% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .animate-break-pulse {
   animation: break-pulse 0.9s ease-in-out infinite;
 }
@@ -136,5 +154,5 @@ body {
 }
 
 .animate-break-text {
-  animation: break-text 1.2s ease-out forwards;
+  animation: break-text 3.5s ease-out forwards;
 }

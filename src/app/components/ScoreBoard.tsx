@@ -5,9 +5,28 @@ import type { GameState } from '../types/game';
 
 interface ScoreBoardProps {
   gameState: GameState;
+  breakModeEnabled?: boolean;
+  breakUsed?: boolean;
+  breakAvailable?: boolean;
+  remainingSquares?: number;
+  onBreakClick?: () => void;
 }
 
-function ScoreBoard({ gameState }: ScoreBoardProps) {
+function ScoreBoard({ 
+  gameState, 
+  breakModeEnabled = false,
+  breakUsed = false,
+  breakAvailable = false,
+  remainingSquares = 0,
+  onBreakClick
+}: ScoreBoardProps) {
+  // Break status message helper
+  const getBreakStatusMessage = () => {
+    if (breakUsed) return '使用済み';
+    if (remainingSquares > 10) return `残り${remainingSquares}マス（残り10マス以下で使用可能）`;
+    if (gameState.currentPlayer !== 'W') return '自分のターン中のみ使用可能';
+    return '発動可能！';
+  };
   return (
     <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl shadow-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
       <h2 className="text-2xl font-bold mb-6 text-center text-white drop-shadow-lg">スコア</h2>
@@ -67,6 +86,31 @@ function ScoreBoard({ gameState }: ScoreBoardProps) {
           <span className="font-medium text-white drop-shadow-lg text-lg">
             {gameState.currentPlayer === 'W' ? '🎯 あなたの番です' : '⚡ CPUの番です'}
           </span>
+        </div>
+      )}
+
+      {/* Break button for desktop (xl and above) */}
+      {breakModeEnabled && (
+        <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-400/20 to-orange-400/20 p-4 rounded-2xl border border-yellow-400/40 shadow-lg">
+          <div className="mb-3">
+            <div className="font-bold text-white text-sm drop-shadow-md flex items-center gap-2 justify-center">
+              ⚡ Break Mode
+              {breakUsed && <span className="text-xs bg-gray-500/30 text-gray-300 px-2 py-0.5 rounded-full">使用済み</span>}
+            </div>
+            <div className="text-xs text-white/70 mt-1 text-center">{getBreakStatusMessage()}</div>
+          </div>
+          <button
+            onClick={onBreakClick}
+            disabled={!breakAvailable}
+            title={!breakAvailable ? '残り10マス以下で使用可能' : 'Breakを発動する'}
+            className={`w-full px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+              breakAvailable
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-105 animate-break-pulse cursor-pointer'
+                : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
+            }`}
+          >
+            ⚡ Break
+          </button>
         </div>
       )}
     </div>

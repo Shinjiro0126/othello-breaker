@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { GameProvider } from "./contexts/GameContext";
+import { AudioProvider } from "./contexts/AudioContext";
 
 export const metadata: Metadata = {
   title: {
@@ -106,7 +107,11 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <GameProvider>{children}</GameProvider>
+        <GameProvider>
+          <AudioProvider>
+            {children}
+          </AudioProvider>
+        </GameProvider>
       </body>
     </html>
   );
