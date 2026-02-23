@@ -52,15 +52,16 @@ interface GameProviderProps {
 }
 
 export function GameProvider({ children }: GameProviderProps) {
-  const [difficulty, setDifficultyState] = useState<DifficultyLevel>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('othello-difficulty');
-      if (saved && ['beginner', 'normal', 'hard', 'master'].includes(saved)) {
-        return saved as DifficultyLevel;
-      }
+  // 初期値はDEFAULT_DIFFICULTYに固定してHydrationエラーを防ぐ
+  const [difficulty, setDifficultyState] = useState<DifficultyLevel>(DEFAULT_DIFFICULTY);
+
+  // クライアントサイドでマウント後にlocalStorageから読み込む
+  useEffect(() => {
+    const saved = localStorage.getItem('othello-difficulty');
+    if (saved && ['beginner', 'normal', 'hard', 'master'].includes(saved)) {
+      setDifficultyState(saved as DifficultyLevel);
     }
-    return DEFAULT_DIFFICULTY;
-  });
+  }, []);
 
   const [gameState, setGameState] = useState<GameState>(() => {
     const initialBoard = OthelloGame.createInitialBoard();
@@ -73,9 +74,17 @@ export function GameProvider({ children }: GameProviderProps) {
       validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
       isThinking: false,
       generationId: 0,
-      difficulty
+      difficulty: DEFAULT_DIFFICULTY
     };
   });
+
+  // difficultyが変更されたらgameStateも更新
+  useEffect(() => {
+    setGameState(prev => ({
+      ...prev,
+      difficulty
+    }));
+  }, [difficulty]);
 
   const [stats, setStats] = useState<GameStats>({
     totalGames: 0,

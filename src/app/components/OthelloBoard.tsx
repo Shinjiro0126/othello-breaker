@@ -3,9 +3,6 @@
 import React from 'react';
 import type { GameState, Piece } from '../types/game';
 
-const CELL_SIZE = 'w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16';
-const PIECE_SIZE = 'w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12';
-
 const CORNERS = [0, 7, 56, 63];
 
 interface OthelloBoardProps {
@@ -42,12 +39,12 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
       <div
         key={index}
         className={`
-          ${CELL_SIZE} border-2 border-emerald-700/50 bg-gradient-to-br from-emerald-600 to-green-600 
+          w-full aspect-square border-2 border-emerald-700/50 bg-gradient-to-br from-emerald-600 to-green-600 
           flex items-center justify-center transition-all duration-300 relative group
           ${cellCursorClass}
-          ${!isBreakSelecting && isValidMove ? 'ring-4 ring-yellow-400 ring-inset shadow-lg shadow-yellow-400/50' : ''}
-          ${!isBreakSelecting && isLastMove ? 'ring-4 ring-red-400 ring-inset shadow-lg shadow-red-400/50' : ''}
-          ${isBreakTarget ? 'ring-4 ring-yellow-400 ring-inset' : ''}
+          ${!isBreakSelecting && isValidMove ? 'ring-2 sm:ring-4 ring-yellow-400 ring-inset shadow-lg shadow-yellow-400/50' : ''}
+          ${!isBreakSelecting && isLastMove ? 'ring-2 sm:ring-4 ring-red-400 ring-inset shadow-lg shadow-red-400/50' : ''}
+          ${isBreakTarget ? 'ring-2 sm:ring-4 ring-yellow-400 ring-inset' : ''}
           ${isBreakCorner ? 'opacity-60' : ''}
         `}
         onClick={handleClick}
@@ -55,24 +52,24 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
         {piece && (
           <div
             className={`
-              ${PIECE_SIZE} rounded-full border-3 transition-all duration-300 shadow-2xl
+              w-[75%] aspect-square rounded-full border-3 transition-all duration-300 shadow-2xl
               ${piece === 'B' ? 'bg-gradient-to-br from-gray-800 to-black border-gray-700' : 'bg-gradient-to-br from-white to-gray-100 border-gray-300'}
-              ${!isBreakSelecting && isLastMove ? 'ring-4 ring-red-400 scale-110' : ''}
+              ${!isBreakSelecting && isLastMove ? 'ring-2 sm:ring-4 ring-red-400 scale-110' : ''}
               ${isBreakTarget ? 'animate-break-pulse' : ''}
               ${!isBreakSelecting ? 'hover:scale-105' : ''}
             `}
           />
         )}
         {!isBreakSelecting && isValidMove && !piece && (
-          <div className={`${PIECE_SIZE} rounded-full bg-yellow-300/70 animate-pulse shadow-lg shadow-yellow-400/50`} />
+          <div className="w-[75%] aspect-square rounded-full bg-yellow-300/70 animate-pulse shadow-lg shadow-yellow-400/50" />
         )}
       </div>
     );
   };
 
   return (
-    <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-800/30 to-green-900/30 p-6 rounded-3xl shadow-2xl border border-white/20 hover:shadow-emerald-500/20 transition-all duration-300">
-      <div className="grid grid-cols-8 gap-1 p-2 bg-gradient-to-br from-emerald-700 to-green-800 rounded-2xl shadow-inner">
+    <div className="backdrop-blur-xl bg-gradient-to-br from-emerald-800/30 to-green-900/30 p-2 sm:p-6 rounded-3xl shadow-2xl border border-white/20 hover:shadow-emerald-500/20 transition-all duration-300 w-full aspect-square max-w-[600px] mx-auto">
+      <div className="grid grid-cols-8 gap-1 p-2 bg-gradient-to-br from-emerald-700 to-green-800 rounded-2xl shadow-inner w-full h-full">
         {gameState.board.map((piece, index) => renderCell(piece, index))}
       </div>
     </div>

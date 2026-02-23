@@ -472,31 +472,7 @@ export default function GamePage() {
           <div className="space-y-6 animate-slide-up w-full" style={{animationDelay: '0.1s'}}>
             <ScoreBoard gameState={gameState} />
 
-            {/* Break button (shown only when Break Mode is ON) */}
-            {breakModeEnabled && (
-              <div className="backdrop-blur-xl bg-white/10 p-4 rounded-3xl border border-white/20">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="font-bold text-white text-sm drop-shadow-md">⚡ Break Mode</div>
-                    <div className="text-xs text-white/60 mt-0.5">{getBreakStatusMessage()}</div>
-                  </div>
-                  <button
-                    onClick={handleBreakClick}
-                    disabled={!breakAvailable}
-                    title={!breakAvailable ? '残り10マス以下で使用可能' : 'Breakを発動する'}
-                    className={`px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
-                      breakAvailable
-                        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-105 animate-break-pulse cursor-pointer'
-                        : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
-                    }`}
-                  >
-                    ⚡ Break
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+            <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl border border-white/20 hover:bg-white/15 transition-all duration-300 hidden xl:block">
               <h3 className="font-semibold mb-3 text-white text-lg drop-shadow-lg">操作方法</h3>
               <ul className="text-sm text-white/90 space-y-2">
                 <li>• 黄色のマーカーが表示された場所をクリックして駒を置けます</li>
@@ -507,6 +483,35 @@ export default function GamePage() {
             </div>
           </div>
         </div>
+
+        {/* Fixed Break button for mobile/tablet (shown at bottom of screen) */}
+        {breakModeEnabled && (
+          <div className="fixed bottom-0 left-0 right-0 z-40 xl:hidden">
+            <div className="backdrop-blur-xl bg-gradient-to-t from-black/80 to-black/60 border-t border-white/20 px-4 py-3 shadow-2xl">
+              <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-white text-sm drop-shadow-md flex items-center gap-2">
+                    ⚡ Break Mode
+                    {breakUsed && <span className="text-xs bg-gray-500/30 text-gray-300 px-2 py-0.5 rounded-full">使用済み</span>}
+                  </div>
+                  <div className="text-xs text-white/70 mt-0.5 truncate">{getBreakStatusMessage()}</div>
+                </div>
+                <button
+                  onClick={handleBreakClick}
+                  disabled={!breakAvailable}
+                  title={!breakAvailable ? '残り10マス以下で使用可能' : 'Breakを発動する'}
+                  className={`shrink-0 px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    breakAvailable
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-105 animate-break-pulse cursor-pointer'
+                      : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
+                  }`}
+                >
+                  ⚡ Break
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
