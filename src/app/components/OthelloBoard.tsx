@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { GameState, Piece } from '../types/game';
+import { useAudio } from '../contexts/AudioContext';
 
 const CORNERS = [0, 7, 56, 63];
 
@@ -10,12 +11,16 @@ interface OthelloBoardProps {
   onCellClick: (index: number) => void;
   isBreakSelecting?: boolean;
   onBreakSelect?: (index: number) => void;
+  brokenPieceIndex?: number | null;
 }
 
-function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBreakSelect }: OthelloBoardProps) {
+function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBreakSelect, brokenPieceIndex = null }: OthelloBoardProps) {
+  const { playEffect } = useAudio();
+
   const renderCell = (piece: Piece, index: number) => {
     const isValidMove = gameState.validMoves.includes(index);
     const isLastMove = gameState.lastMove === index;
+    const isBrokenPiece = brokenPieceIndex === index;
 
     // Break selection mode: highlight opponent (black) non-corner pieces
     const isBreakTarget = isBreakSelecting && piece === 'B' && !CORNERS.includes(index);
@@ -28,6 +33,12 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
         }
         return;
       }
+      
+      // 通常のゲームプレイ時に有効な手の場合、効果音を再生
+      if (isValidMove) {
+        playEffect('othello');
+      }
+      
       onCellClick(index);
     };
 
@@ -56,6 +67,7 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
               ${piece === 'B' ? 'bg-gradient-to-br from-gray-800 to-black border-gray-700' : 'bg-gradient-to-br from-white to-gray-100 border-gray-300'}
               ${!isBreakSelecting && isLastMove ? 'ring-2 sm:ring-4 ring-red-400 scale-110' : ''}
               ${isBreakTarget ? 'animate-break-pulse' : ''}
+              ${isBrokenPiece ? 'ring-4 ring-cyan-300 shadow-[0_0_20px_rgba(103,232,249,0.8)] animate-pulse' : ''}
               ${!isBreakSelecting ? 'hover:scale-105' : ''}
             `}
           />

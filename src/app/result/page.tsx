@@ -1,8 +1,10 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
+import { useAudio } from '../contexts/AudioContext';
+import AudioControl from '../components/AudioControl';
 import { OthelloGame } from '../utils/othelloGame';
 import VictoryAnimation from '../components/VictoryAnimation';
 import { LooseAnimation } from '../components/LooseAnimation';
@@ -12,11 +14,18 @@ import AdsenseModal from '../components/AdsenseModal';
 
 export default function ResultPage() {
   const { gameState, startNewGame } = useGameContext();
+  const { playBGM } = useAudio();
   const router = useRouter();
   const winner = OthelloGame.getWinner(gameState.board);
 
   const [showAdModal, setShowAdModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<null | 'rematch' | 'home'>(null);
+
+  // リザルト画面を開いた時にBGMを再生（初回のみ）
+  useEffect(() => {
+    playBGM('top');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleRematch = () => {
     setPendingAction('rematch');
@@ -48,6 +57,7 @@ export default function ResultPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-8">
+      <AudioControl />
       {/* 背景画像 */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -106,19 +116,50 @@ export default function ResultPage() {
           </div>
 
           {winner === 'B' && (
-            <div className="backdrop-blur-md bg-blue-500/20 p-6 rounded-2xl mb-8 text-center border border-blue-300/30">
-              <p className="text-white/90 drop-shadow-lg">
-                CPUは強力ですが、時間制限により完璧ではありません。<br />
-                次の対局でもう一手先を読んでみましょう。
+            <div className="backdrop-blur-md bg-gradient-to-r from-blue-500/20 to-purple-500/20 p-6 rounded-2xl mb-8 text-center border border-blue-300/40">
+              <p className="text-white font-semibold text-lg mb-3">
+                惜しい！今回はちょっと及びませんでした！
+              </p>
+              <p className="text-yellow-300 font-semibold">
+               「Break」のタイミングを少し変えるだけで、
+              </p>
+              <p className="text-yellow-300 font-semibold mb-2">
+                結果は大きく変わります！
+              </p>
+              <p className="text-white/80 text-sm">
+                もう一度挑戦してみましょう。勝利はすぐそこです！
+              </p>
+            </div>
+          )}
+
+          {winner === 'tie' && (
+            <div className="backdrop-blur-md bg-gradient-to-r from-yellow-500/20 to-orange-500/20 p-6 rounded-2xl mb-8 text-center border border-yellow-300/40">
+              <p className="text-yellow-300 font-black text-xl mb-3">
+                ⚖️ 互角の勝負！ ⚖️
+              </p>
+              <p className="text-white text-lg font-semibold mb-2">
+                最強AIと引き分けとは、驚異的です！
+              </p>
+              <p className="text-orange-300 font-semibold mb-3">
+                あなたの実力は本物。次は勝利を掴みましょう！
+              </p>
+              <p className="text-white/80 text-sm">
+                Breakの使い方次第で、完全勝利も夢じゃありません！
               </p>
             </div>
           )}
 
           {winner === 'W' && (
-            <div className="backdrop-blur-md bg-green-500/20 p-6 rounded-2xl mb-8 text-center border border-green-300/30">
-              <p className="text-white/90 drop-shadow-lg">
-                素晴らしい！時間制限のあるCPUに勝利しました。<br />
-                この調子で連勝を目指しましょう！
+            <div className="backdrop-blur-md bg-gradient-to-r from-green-500/30 to-yellow-500/20 p-6 rounded-2xl mb-8 text-center border-2 border-green-300/50 shadow-[0_0_30px_rgba(74,222,128,0.3)]">
+              <p className="text-2xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,1)] mb-3">
+                CPUを完全に撃破！
+              </p>
+              <p className="text-green-300 font-semibold mb-2">
+                あなたの戦略眼は完璧でした！
+              </p>
+              <p className="text-white/90 text-sm">
+                あなたの一勝が、全体の勝率を押し上げました！<br/>
+                この勢いで、さらに記録を伸ばしますか？
               </p>
             </div>
           )}

@@ -42,7 +42,7 @@ export const DIFFICULTY_DESCRIPTIONS: Record<DifficultyLevel, string> = {
   beginner: '浅い読み + 角重視',
   normal: '標準（終盤完全読みなし）',
   hard: '強い（反復深化あり）',
-  master: '最強（現行の強さ）',
+  master: '最強（15手先までの読み）',
 };
 
 export const DEFAULT_DIFFICULTY: DifficultyLevel = 'normal';
