@@ -60,14 +60,12 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const isMutedRef = useRef(isMuted);
   const volumeRef = useRef(volume);
 
-  // Refを同期
+  // BGMのRefのみ同期（isMuted/volumeはtoggleMute/setVolumeで直接更新）
   useEffect(() => {
     currentBGMRef.current = currentBGM;
-    isMutedRef.current = isMuted;
-    volumeRef.current = volume;
-  }, [currentBGM, isMuted, volume]);
+  }, [currentBGM]);
 
-  // BGM音量とミュート状態の更新
+  // BGM音量とミュート状態の更新（フォールバック）
   useEffect(() => {
     if (bgmRef.current) {
       bgmRef.current.volume = isMuted ? 0 : volume;
@@ -150,10 +148,16 @@ export function AudioProvider({ children }: AudioProviderProps) {
     });
   }, [audioInitialized]);
 
-  // ミュート切り替え
+  // ミュート切り替え（Refとbgmへ即時反映）
   const toggleMute = useCallback(() => {
     setIsMuted(prev => {
       const newValue = !prev;
+      // Refを即時更新
+      isMutedRef.current = newValue;
+      // 再生中のBGMに即時反映
+      if (bgmRef.current) {
+        bgmRef.current.volume = newValue ? 0 : volumeRef.current;
+      }
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('audioMuted', String(newValue));
@@ -165,17 +169,22 @@ export function AudioProvider({ children }: AudioProviderProps) {
     });
   }, []);
 
-  // 音量設定（デバウンス）
+  // 音量設定（Refとbgmへ即時反映、localStorage保存はデバウンス）
   const saveVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const setVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    // Refを即時更新
+    volumeRef.current = clampedVolume;
+    // 再生中のBGMに即時反映（ミュート中でなければ）
+    if (bgmRef.current && !isMutedRef.current) {
+      bgmRef.current.volume = clampedVolume;
+    }
     setVolumeState(clampedVolume);
     
-    // デバウンス処理
+    // デバウンスでlocalStorage保存
     if (saveVolumeTimeoutRef.current) {
       clearTimeout(saveVolumeTimeoutRef.current);
     }
-    
     saveVolumeTimeoutRef.current = setTimeout(() => {
       if (typeof window !== 'undefined') {
         try {
