@@ -1,11 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAudio } from '../contexts/AudioContext';
 
 export default function AudioControl() {
   const { isMuted, volume, toggleMute, setVolume } = useAudio();
   const [showModal, setShowModal] = useState(false);
+  // SSR とクライアント初回レンダリングを一致させるため、マウント後に true にする
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // マウント前（SSR）は isMuted=false として扱い、ハイドレーションミスマッチを防ぐ
+  const effectiveMuted = mounted && isMuted;
 
   return (
     <>
@@ -15,7 +21,7 @@ export default function AudioControl() {
         className="fixed top-4 right-4 z-50 p-3 rounded-full backdrop-blur-xl bg-white/10 hover:bg-white/20 transition-all duration-200 shadow-2xl border border-white/20"
         aria-label="音量設定"
       >
-        {isMuted ? (
+        {effectiveMuted ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -67,7 +73,7 @@ export default function AudioControl() {
               onClick={toggleMute}
               className="w-full p-4 rounded-2xl bg-white/20 hover:bg-white/30 transition-all duration-200 mb-6 flex items-center justify-center gap-3"
             >
-              {isMuted ? (
+              {effectiveMuted ? (
                 <>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

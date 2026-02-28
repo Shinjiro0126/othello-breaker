@@ -82,12 +82,11 @@ export default function GamePage() {
         }).catch(error => {
           console.error('Failed to save game result to Firestore:', error);
         });
-
-        // 結果ページへ遷移（少し遅延を入れる）
-        setTimeout(() => {
-          router.push('/result');
-        }, 1500);
       }
+      // winner が null（Breakモード等で盤面状態が不整合）でも必ず結果画面へ遷移する
+      setTimeout(() => {
+        router.push('/result');
+      }, 1500);
     } else if (gameState.gamePhase === 'playing') {
       savedGameRef.current = false;
     }

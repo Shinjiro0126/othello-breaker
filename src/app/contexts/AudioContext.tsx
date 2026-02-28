@@ -33,23 +33,9 @@ interface AudioProviderProps {
 }
 
 export function AudioProvider({ children }: AudioProviderProps) {
-  // LocalStorageから設定を一度だけ読み込み
-  const [settings] = useState(() => {
-    if (typeof window === 'undefined') return { muted: false, volume: 0.3 };
-    
-    try {
-      return {
-        muted: localStorage.getItem('audioMuted') === 'true',
-        volume: parseFloat(localStorage.getItem('audioVolume') || '0.3')
-      };
-    } catch (error) {
-      console.error('Failed to load audio settings:', error);
-      return { muted: false, volume: 0.3 };
-    }
-  });
-
-  const [isMuted, setIsMuted] = useState(settings.muted);
-  const [volume, setVolumeState] = useState(settings.volume);
+  // SSRとクライアントの初期表示を一致させるため、初期値は必ず固定値にする
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolumeState] = useState(0.3);
   const [currentBGM, setCurrentBGM] = useState<BGMType>(null);
   const [audioInitialized, setAudioInitialized] = useState(false);
   
@@ -59,6 +45,24 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const currentBGMRef = useRef<BGMType>(null);
   const isMutedRef = useRef(isMuted);
   const volumeRef = useRef(volume);
+
+  // マウント後にのlocalStorageから設定を読み込む（SSRとハイドレーションを分離する）
+  useEffect(() => {
+    try {
+      const savedMuted = localStorage.getItem('audioMuted') === 'true';
+      const savedVolume = parseFloat(localStorage.getItem('audioVolume') || '0.3');
+      if (savedMuted !== isMutedRef.current) {
+        isMutedRef.current = savedMuted;
+        setIsMuted(savedMuted);
+      }
+      if (savedVolume !== volumeRef.current) {
+        volumeRef.current = savedVolume;
+        setVolumeState(savedVolume);
+      }
+    } catch (error) {
+      console.error('Failed to load audio settings:', error);
+    }
+  }, []);
 
   // BGMのRefのみ同期（isMuted/volumeはtoggleMute/setVolumeで直接更新）
   useEffect(() => {
