@@ -77,20 +77,20 @@ export default function ResultPage() {
           <div className="mb-8">
             <h2 className="text-xl font-bold mb-6 text-center text-white drop-shadow-lg">最終スコア</h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="backdrop-blur-md bg-gradient-to-br from-gray-800/60 to-black/60 py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
-                <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="backdrop-blur-md bg-gradient-to-br from-gray-800/60 to-black/60 py-2 sm:py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 space-y-2 sm:space-y-0 mb-4">
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
                   <span className="font-bold text-white drop-shadow-lg">CPU (黒)</span>
                 </div>
-                <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.black}</div>
+                <div className="text-2xl sm:text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.black}</div>
               </div>
               
-              <div className="backdrop-blur-md py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
-                <div className="flex items-center justify-center space-x-3 mb-4">
+              <div className="backdrop-blur-md py-2 sm:py-6 px-2 rounded-2xl border-2 border-white/20 hover:scale-105 transition-transform duration-300">
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 space-y-2 sm:space-y-0 mb-4">
                   <div className="w-8 h-8 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
                   <span className="font-bold text-white drop-shadow-lg">あなた (白)</span>
                 </div>
-                <div className="text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.white}</div>
+                <div className="text-2xl sm:text-4xl sm:text-5xl font-bold text-center text-white drop-shadow-xl">{gameState.scores.white}</div>
               </div>
             </div>
           </div>

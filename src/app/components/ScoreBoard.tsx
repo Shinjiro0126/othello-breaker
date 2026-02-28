@@ -28,18 +28,18 @@ function ScoreBoard({
     return '発動可能！';
   };
   return (
-    <div className="backdrop-blur-xl bg-white/10 p-6 rounded-3xl shadow-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
-      <h2 className="text-2xl font-bold mb-6 text-center text-white drop-shadow-lg">スコア</h2>
+    <div className="backdrop-blur-xl bg-white/10 p-3 sm:p-6 rounded-3xl shadow-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
+      <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center text-white drop-shadow-lg">スコア</h2>
       
       <div className="space-y-4 mb-6">
         <div className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 ${
           gameState.currentPlayer === 'B' 
-            ? 'bg-gradient-to-r from-gray-800/80 to-black/80 border-gray-600 shadow-lg shadow-black/30 backdrop-blur-md scale-105' 
+            ? 'bg-gradient-to-r from-gray-800/80 to-black/80 border-gray-600 shadow-lg shadow-black/30 backdrop-blur-md scale-102' 
             : 'bg-white/10 border-white/20 backdrop-blur-sm'
         }`}>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
-            <span className={`font-bold text-lg drop-shadow-lg ${
+            <span className={`font-bold sm:text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/80'
             }`}>
               CPU (黒)
@@ -54,12 +54,12 @@ function ScoreBoard({
         
         <div className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 ${
           gameState.currentPlayer === 'W' 
-            ? 'bg-gradient-to-r from-blue-600/80 to-purple-600/80 border-blue-400 shadow-lg shadow-blue-500/30 backdrop-blur-md scale-105' 
+            ? 'bg-gradient-to-r from-blue-600/80 to-purple-600/80 border-blue-400 shadow-lg shadow-blue-500/30 backdrop-blur-md scale-102' 
             : 'bg-white/10 border-white/20 backdrop-blur-sm'
         }`}>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
-            <span className={`font-bold text-lg drop-shadow-lg ${
+            <span className={`font-bold sm:text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/80'
             }`}>
               あなた (白)
@@ -105,7 +105,7 @@ function ScoreBoard({
             title={!breakAvailable ? '残り10マス以下で使用可能' : 'Breakを発動する'}
             className={`w-full px-6 py-3 rounded-2xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
               breakAvailable
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-105 animate-break-pulse cursor-pointer'
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 shadow-lg shadow-yellow-400/40 hover:scale-102 animate-break-pulse cursor-pointer'
                 : 'bg-white/10 text-white/40 border border-white/20 cursor-not-allowed'
             }`}
           >

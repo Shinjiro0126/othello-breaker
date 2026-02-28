@@ -3,6 +3,7 @@
 import { useGameContext } from './contexts/GameContext';
 import { useAudio } from './contexts/AudioContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import type { DifficultyLevel } from './types/game';
 import { DIFFICULTY_LABELS, DIFFICULTY_DESCRIPTIONS, DIFFICULTY_CONFIGS } from './config/difficulty';
@@ -156,7 +157,7 @@ export default function Home() {
                 {(Object.keys(DIFFICULTY_CONFIGS) as DifficultyLevel[]).map((level) => (
                   <label
                     key={level}
-                    className={`flex items-start p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
+                    className={`flex items-start p-3 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
                       selectedDifficulty === level
                         ? 'border-violet-300/70 bg-blue-500/20 ring-2 ring-blue-300/40 shadow-[0_0_30px_rgba(139,92,246,0.35)] backdrop-blur-md scale-102'
                         : 'border-white/20 hover:border-white/40 hover:bg-white/10 backdrop-blur-md'
@@ -180,7 +181,7 @@ export default function Home() {
 
               <div className="text-center animate-slide-up mt-8" style={{animationDelay: '0.2s'}}>
                 {/* Break Mode トグル */}
-                <div className="flex items-center justify-center gap-4 mb-6 p-4 rounded-2xl border border-white/20 backdrop-blur-md bg-white/10">
+                <div className="flex items-center justify-center gap-4 mb-6 p-2 sm:p-4 rounded-2xl border border-white/20 backdrop-blur-md bg-white/10">
                   <div className="flex-1 text-left">
                     <div className="font-bold text-white drop-shadow-md flex items-center gap-2">
                       ⚡ Break Mode
@@ -234,19 +235,19 @@ export default function Home() {
         <footer className="mt-12 text-center animate-fade-in" style={{animationDelay: '0.4s'}}>
           <div className="backdrop-blur-md bg-white/10 p-6 rounded-2xl border border-white/20">
             <div className="flex flex-wrap justify-center gap-6 text-white/90 text-sm">
-              <a 
+              <Link 
                 href="/about" 
                 className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white"
               >
                 このサイトについて
-              </a>
+              </Link>
               <span className="text-white/40">|</span>
-              <a 
+              <Link 
                 href="/privacy" 
                 className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white"
               >
                 プライバシーポリシー
-              </a>
+              </Link>
             </div>
             <p className="mt-3 text-white/70 text-xs">
               © 2026 Othello Breaker. All rights reserved.

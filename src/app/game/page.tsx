@@ -24,6 +24,7 @@ export default function GamePage() {
   const [showBreakText, setShowBreakText] = useState(false);
   const [showBreakCpuResume, setShowBreakCpuResume] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
+  const [showBreakInfo, setShowBreakInfo] = useState(false);
   const [brokenPieceIndex, setBrokenPieceIndex] = useState<number | null>(null);
 
   // Get difficulty configuration
@@ -492,8 +493,18 @@ export default function GamePage() {
           </div>
         )}
 
-        <div className="text-center mb-8 animate-fade-in">
-          <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-2xl">Othello Breaker</h1>
+        <div className="text-center mb-6 sm:mb-8 animate-fade-in">
+          <h1 className="text-6xl font-bold text-white mb-2 drop-shadow-2xl tracking-tight">
+                      <Image 
+                        src="/logo.png" 
+                        alt="Othello Breaker" 
+                        width={400} 
+                        height={120} 
+                        className="mx-auto" 
+                        priority
+                        quality={85}
+                      />
+                    </h1>
           <div className="inline-flex gap-3 items-center backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
             <span className="text-white/90 text-sm font-medium drop-shadow-lg">
               モード: {gameState.difficulty === 'beginner' ? 'ビギナー' : gameState.difficulty === 'normal' ? 'ノーマル' : gameState.difficulty === 'hard' ? 'ハード' : 'マスター'}
@@ -502,8 +513,8 @@ export default function GamePage() {
               <span className="text-xs bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 px-2 py-0.5 rounded-full">⚡ Break Mode</span>
             )}
           </div>
-          <p className="text-lg text-white/90 drop-shadow-lg">
-            最強AIが相手。だが、あなたには「Break」がある。諦めない者が、逆転を掌る。
+          <p className="text-sm sm:text-lg text-white/90 drop-shadow-lg">
+            最強AIが相手。<br className='sm:hidden' />だが、あなたには「Break」がある。<br className='sm:hidden' />諦めない者が、逆転を掌る。
           </p>
         </div>
 
@@ -562,14 +573,57 @@ export default function GamePage() {
         {/* Fixed Break button for mobile/tablet (shown at bottom of screen) */}
         {breakModeEnabled && (
           <div className="fixed bottom-0 left-0 right-0 z-40 xl:hidden">
-            <div className="backdrop-blur-xl bg-gradient-to-t from-black/80 to-black/60 border-t border-white/20 px-4 py-3 shadow-2xl">
-              <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+            {/* Break Info Modal */}
+            {showBreakInfo && (
+              <div className="fixed inset-0 z-50 flex items-end justify-center p-4" onClick={() => setShowBreakInfo(false)}>
+                <div
+                  className="w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-3 shadow-2xl animate-fade-in mb-24"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-black text-yellow-300 text-lg">⚡ Break Mode とは？</h3>
+                    <button onClick={() => setShowBreakInfo(false)} className="text-white/50 hover:text-white text-xl leading-none">✕</button>
+                  </div>
+                  <ul className="text-sm text-white/90 space-y-2 mb-4">
+                    <li>• <span className="text-yellow-300 font-bold">1ゲームに1回</span>だけ使える必殺技</li>
+                    <li>• 相手の<span className="text-yellow-300 font-bold">角以外の石1つ</span>を自分の石に変換</li>
+                    <li>• 使用後は<span className="text-yellow-300 font-bold">相手のターン</span>に移行</li>
+                    <li>• 通常の石の反転は起こらない（選んだ石のみ変化）</li>
+                  </ul>
+                  <div className="bg-white/5 rounded-2xl p-3 border border-white/10 text-xs text-white/70">
+                    <p className="font-bold text-white/90 mb-1">使用条件</p>
+                    <ul >
+                      <li className='font-bold text-yellow-300'>• 残り10マス以下</li>
+                      <li className='text-white'>• 自分のターン</li>
+                      <li className='text-white'>• 未使用</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="backdrop-blur-xl bg-gradient-to-t from-black/80 to-black/60 border-t border-white/20 px-4 pt-3 pb-6 shadow-2xl">
+              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-white text-sm drop-shadow-md flex items-center gap-2">
                     ⚡ Break Mode
                     {breakUsed && <span className="text-xs bg-gray-500/30 text-gray-300 px-2 py-0.5 rounded-full">使用済み</span>}
+                    <button
+                      onClick={() => setShowBreakInfo(true)}
+                      className="w-5 h-5 rounded-full bg-white/20 text-white/70 hover:bg-white/30 hover:text-white transition-all text-xs leading-none flex items-center justify-center"
+                      aria-label="Break Modeの説明を表示"
+                    >
+                      ?
+                    </button>
                   </div>
-                  <div className="text-xs text-white/70 mt-0.5 truncate">{getBreakStatusMessage()}</div>
+                  <div className="text-xs text-white/70 mt-0.5">
+                    {breakUsed
+                      ? '使用済み'
+                      : remainingSquares > 10
+                      ? `残り${remainingSquares - 10}マスで使用可能`
+                      : gameState.currentPlayer !== 'W'
+                      ? '自分のターンで発動可能'
+                      : '今すぐ発動できる！'}
+                  </div>
                 </div>
                 <button
                   onClick={handleBreakClick}

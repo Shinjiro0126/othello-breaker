@@ -11,6 +11,17 @@ export default function PrivacyPolicy() {
   // ページ読み込み時にBGM再生
   useEffect(() => {
     playBGM('top');
+
+    // 自動再生失敗時のフォールバック
+    const handleFirstInteraction = () => {
+      playBGM('top');
+    };
+
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

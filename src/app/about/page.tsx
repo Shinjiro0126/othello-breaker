@@ -10,6 +10,17 @@ export default function About() {
 
   useEffect(() => {
     playBGM('top');
+
+    // 自動再生失敗時のフォールバック
+    const handleFirstInteraction = () => {
+      playBGM('top');
+    };
+
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -27,8 +38,8 @@ export default function About() {
       <div className="max-w-4xl mx-auto relative z-10 w-full space-y-8">
 
         {/* ページタイトル */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20 animate-fade-in">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl">
+        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-white/20 animate-fade-in">
+          <h1 className="text-xl sm:text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-2xl">
             <span className="bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
               Othello Breaker について
             </span>
@@ -39,9 +50,9 @@ export default function About() {
         </div>
 
         {/* ① 遊び方説明 */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="text-2xl">📖</span> 遊び方
+        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-white/20">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="text-xl sm:text-3xl md:text-4xl">📖</span> 遊び方
           </h2>
           <ol className="space-y-4">
             {[
@@ -65,9 +76,9 @@ export default function About() {
         </div>
 
         {/* ② 必殺技「Break」の解説 */}
-        <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-900/30 to-orange-900/20 rounded-3xl shadow-2xl p-6 md:p-10 border border-yellow-400/30">
-          <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-            <span className="text-2xl">⚡</span> 必殺技「Break」
+        <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-900/30 to-orange-900/20 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-yellow-400/30">
+          <h2 className="text-xl sm:text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <span className="text-xl sm:text-3xl">⚡</span> 必殺技「Break」
           </h2>
           <p className="text-yellow-300 font-bold mb-6">絶望を希望に変える、運命の一手</p>
 
@@ -104,9 +115,9 @@ export default function About() {
         </div>
 
         {/* ③ AIレベル説明 */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="text-2xl">🤖</span> AIレベル解説
+        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-white/20">
+          <h2 className="text-xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="text-xl sm:text-3xl">🤖</span> AIレベル解説
           </h2>
           <p className="text-white/80 text-sm mb-6">
             Othello Breakerは<strong className="text-white">ミニマックス法</strong>と<strong className="text-white">アルファベータ枝刈り</strong>を用いた高度な探索エンジンを搭載。角・辺・危険マスの位置評価を組み合わせて最善手を計算します。
@@ -146,10 +157,12 @@ export default function About() {
                 detail: "終盤のほぼすべてを完全読みで解く最強AI。序盤・中盤から角を意識した最善手を打ち続けます。Breakを最高のタイミングで使わない限り、勝利は困難です。",
               },
             ].map(({ label, color, border, badge, depth, detail }) => (
-              <div key={label} className={`bg-gradient-to-r ${color} rounded-2xl p-5 border ${border}`}>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${badge} border ${border}`}>{label}</span>
-                  <span className="text-white/60 text-xs">{depth}</span>
+              <div key={label} className={`bg-gradient-to-r ${color} rounded-2xl p-3 sm:p-5 border ${border}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+                  <div>
+                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${badge} border ${border}`}>{label}</span>
+                  </div>
+                  <p className="text-white/60 text-xs">{depth}</p>
                 </div>
                 <p className="text-white/90 text-sm">{detail}</p>
               </div>
@@ -158,9 +171,9 @@ export default function About() {
         </div>
 
         {/* ④ 戦略ヒント */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="text-2xl">🎯</span> 勝利への戦略ヒント
+        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-white/20">
+          <h2 className="text-xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="text-xl sm:text-3xl">🎯</span> 勝利への戦略ヒント
           </h2>
           <div className="grid md:grid-cols-2 gap-5">
             {[
@@ -171,8 +184,8 @@ export default function About() {
               { icon: "⚡", title: "Breakは「引き分け回避」より「逆転」に使う", body: "Breakを守りで使うのは勿体ない。3〜5石差の拮抗状態で、角周辺の石に使うと一気に逆転できます。" },
               { icon: "📐", title: "辺の石を先に確保しない", body: "辺の端以外を早めに埋めると相手に角を渡しやすくなります。辺は角確保の確定後に進めるのが基本セオリー。" },
             ].map(({ icon, title, body }) => (
-              <div key={title} className="bg-black/30 rounded-2xl p-5 border border-white/10">
-                <h3 className="font-bold text-white mb-2 flex items-center gap-2"><span>{icon}</span>{title}</h3>
+              <div key={title} className="bg-black/30 rounded-2xl p-3 sm:p-5 border border-white/10">
+                <h3 className="sm:text-xl font-bold text-white mb-2 flex items-center gap-2"><span>{icon}</span>{title}</h3>
                 <p className="text-white/80 text-sm">{body}</p>
               </div>
             ))}
@@ -180,9 +193,9 @@ export default function About() {
         </div>
 
         {/* ⑤ 勝率の意味 */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="text-2xl">📊</span> 勝率・対戦成績の見方
+        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-3 sm:p-6 md:p-10 border border-white/20">
+          <h2 className="text-xl sm:text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className="text-xl sm:text-3xl">📊</span> 勝率・対戦成績の見方
           </h2>
           <p className="text-white/80 text-sm mb-6">
             トップページの「対戦成績」は、プレイした全ゲームの結果をクラウドに保存・集計したものです。
@@ -193,15 +206,15 @@ export default function About() {
               { label: "総対戦数", color: "text-blue-400", desc: "これまでに完了したゲームの合計。引き分けや途中終了は含まれません。" },
               { label: "引き分け", color: "text-gray-400", desc: "双方が28個ずつの状態。最強AIと引き分けは実質的に「勝利相当」の実力です。" },
             ].map(({ label, color, desc }) => (
-              <div key={label} className="bg-black/30 rounded-2xl p-4 border border-white/10">
-                <p className={`text-xl font-bold ${color} mb-2`}>{label}</p>
+              <div key={label} className="bg-black/30 rounded-2xl p-3 sm:p-5 border border-white/10">
+                <p className={`text-lg sm:text-xl font-bold ${color} mb-2`}>{label}</p>
                 <p className="text-white/80 text-sm">{desc}</p>
               </div>
             ))}
           </div>
-          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl p-5 border border-blue-400/30">
-            <h3 className="font-bold text-white mb-3">🎖️ 難易度別の目安勝率</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-center">
+          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl p-3 sm:p-5 border border-blue-400/30">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3">🎖️ 難易度別の目安勝率</h3>
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 text-sm text-center">
               {[
                 { level: "ビギナー", target: "60〜80%", note: "まず角を意識しよう" },
                 { level: "ノーマル", target: "30〜50%", note: "Break活用で突破口を" },
@@ -209,42 +222,12 @@ export default function About() {
                 { level: "マスター", target: "5〜15%", note: "超えたら真の強者" },
               ].map(({ level, target, note }) => (
                 <div key={level} className="bg-black/30 rounded-xl p-3 border border-white/10">
-                  <p className="font-bold text-white">{level}</p>
-                  <p className="text-yellow-300 font-bold">{target}</p>
+                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{level}</p>
+                  <p className="text-yellow-300 text-lg sm:text-xl md:text-2xl font-bold">{target}</p>
                   <p className="text-white/60 text-xs mt-1">{note}</p>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        {/* ⑥ 開発コンセプト */}
-        <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-6 md:p-10 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <span className="text-2xl">💡</span> 開発コンセプト
-          </h2>
-          <div className="space-y-5 text-white/90 leading-relaxed">
-            <p>
-              <span className="text-yellow-300 font-bold">「強いAIに何度負けても、また挑戦したくなるゲーム」</span>を目指して開発しました。
-            </p>
-            <p>
-              従来のオセロゲームでは、AIとの実力差が大きくなるほど「詰んだ感」が強まり、プレイヤーは諦めてしまいがちです。Othello Breakerではその課題を解決するために、<strong className="text-white">「Break」という逆転装置</strong>を終盤に導入しました。
-            </p>
-            <p>
-              Breakは単なるチート機能ではありません。<strong className="text-white">発動タイミング・使用対象・残りマス数</strong>という3つの判断を正しく行った時にのみ、真の逆転が生まれます。これは「戦略的思考」と「一発逆転のカタルシス」を両立させるための設計です。
-            </p>
-            <div className="bg-black/30 rounded-2xl p-5 border border-white/10">
-              <h3 className="font-bold text-white mb-3">🛠 技術スタック</h3>
-              <ul className="text-sm space-y-1 text-white/80">
-                <li>• <strong className="text-white">フロントエンド：</strong>Next.js 15 / React 19 / TypeScript / Tailwind CSS</li>
-                <li>• <strong className="text-white">AI思考エンジン：</strong>ミニマックス法 + アルファベータ枝刈り + 反復深化探索</li>
-                <li>• <strong className="text-white">データ永続化：</strong>Firebase Firestore（対戦結果のクラウド保存）</li>
-                <li>• <strong className="text-white">音響：</strong>Web Audio API ベースのBGM・効果音システム</li>
-              </ul>
-            </div>
-            <p className="text-white/70 text-sm">
-              バグ報告・機能要望などがありましたら、フッターのお問い合わせよりご連絡ください。
-            </p>
           </div>
         </div>
 

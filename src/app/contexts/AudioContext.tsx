@@ -53,7 +53,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   useEffect(() => {
     try {
       const savedMuted = localStorage.getItem('audioMuted') === 'true';
-      const savedVolume = parseFloat(localStorage.getItem('audioVolume') || '0.3');
+      const savedVolume = parseFloat(localStorage.getItem('audioVolume') || '0.2');
       if (savedMuted !== isMutedRef.current) {
         isMutedRef.current = savedMuted;
         setIsMuted(savedMuted);
@@ -244,10 +244,31 @@ export function AudioProvider({ children }: AudioProviderProps) {
       }
     };
 
+    // 電源OFF→再起動後のブラウザ復帰に対応（pageshow）
+    const handlePageShow = () => {
+      if (!bgmRef.current) {
+        // 完全リロード後はbgmRefがnullのため、pendingに積んでユーザー操作時に再生
+        if (currentBGMRef.current) {
+          pendingBGMRef.current = currentBGMRef.current;
+        }
+        return;
+      }
+      if (!isMutedRef.current && bgmRef.current.paused) {
+        bgmRef.current.play().catch(() => {
+          // 自動再生ポリシーでブロックされた場合はpendingに積む
+          if (currentBGMRef.current) {
+            pendingBGMRef.current = currentBGMRef.current;
+          }
+        });
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow);
     };
   }, []);
 
