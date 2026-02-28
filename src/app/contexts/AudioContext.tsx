@@ -8,6 +8,7 @@ interface AudioContextType {
   isMuted: boolean;
   volume: number;
   currentBGM: BGMType;
+  isIOS: boolean;
   toggleMute: () => void;
   setVolume: (volume: number) => void;
   playBGM: (type: BGMType) => void;
@@ -38,6 +39,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const [volume, setVolumeState] = useState(0.3);
   const [currentBGM, setCurrentBGM] = useState<BGMType>(null);
   const [audioInitialized, setAudioInitialized] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const effectRef = useRef<HTMLAudioElement | null>(null);
@@ -45,6 +47,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const currentBGMRef = useRef<BGMType>(null);
   const isMutedRef = useRef(isMuted);
   const volumeRef = useRef(volume);
+  const isIOSRef = useRef(false);
 
   // マウント後にのlocalStorageから設定を読み込む（SSRとハイドレーションを分離する）
   useEffect(() => {
@@ -64,6 +67,15 @@ export function AudioProvider({ children }: AudioProviderProps) {
     }
   }, []);
 
+  // iOS判定（audio.volumeが効かないデバイスを検出）
+  useEffect(() => {
+    const ios =
+      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    isIOSRef.current = ios;
+    setIsIOS(ios);
+  }, []);
+
   // BGMのRefのみ同期（isMuted/volumeはtoggleMute/setVolumeで直接更新）
   useEffect(() => {
     currentBGMRef.current = currentBGM;
@@ -72,7 +84,12 @@ export function AudioProvider({ children }: AudioProviderProps) {
   // BGM音量とミュート状態の更新（フォールバック）
   useEffect(() => {
     if (bgmRef.current) {
-      bgmRef.current.volume = isMuted ? 0 : volume;
+      if (isIOSRef.current) {
+        // iOSはvolumeが読み取り専用のためmutedを使用
+        bgmRef.current.muted = isMuted;
+      } else {
+        bgmRef.current.volume = isMuted ? 0 : volume;
+      }
     }
   }, [isMuted, volume]);
 
@@ -98,7 +115,11 @@ export function AudioProvider({ children }: AudioProviderProps) {
     if (type) {
       const audio = new Audio(BGM_PATHS[type]);
       audio.loop = true;
-      audio.volume = isMutedRef.current ? 0 : volumeRef.current;
+      if (isIOSRef.current) {
+        audio.muted = isMutedRef.current;
+      } else {
+        audio.volume = isMutedRef.current ? 0 : volumeRef.current;
+      }
       audio.play().then(() => {
         setAudioInitialized(true);
         pendingBGMRef.current = null;
@@ -135,7 +156,11 @@ export function AudioProvider({ children }: AudioProviderProps) {
           if (pendingType) {
             const audio = new Audio(BGM_PATHS[pendingType]);
             audio.loop = true;
-            audio.volume = isMutedRef.current ? 0 : volumeRef.current;
+            if (isIOSRef.current) {
+              audio.muted = isMutedRef.current;
+            } else {
+              audio.volume = isMutedRef.current ? 0 : volumeRef.current;
+            }
             audio.play().catch(console.error);
             bgmRef.current = audio;
           }
@@ -160,7 +185,11 @@ export function AudioProvider({ children }: AudioProviderProps) {
       isMutedRef.current = newValue;
       // 再生中のBGMに即時反映
       if (bgmRef.current) {
-        bgmRef.current.volume = newValue ? 0 : volumeRef.current;
+        if (isIOSRef.current) {
+          bgmRef.current.muted = newValue;
+        } else {
+          bgmRef.current.volume = newValue ? 0 : volumeRef.current;
+        }
       }
       if (typeof window !== 'undefined') {
         try {
@@ -176,6 +205,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   // 音量設定（Refとbgmへ即時反映、localStorage保存はデバウンス）
   const saveVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const setVolume = useCallback((newVolume: number) => {
+    if (isIOSRef.current) return; // iOSはvolumeが効かないためスキップ
     const clampedVolume = Math.max(0, Math.min(1, newVolume));
     // Refを即時更新
     volumeRef.current = clampedVolume;
@@ -198,6 +228,27 @@ export function AudioProvider({ children }: AudioProviderProps) {
         }
       }
     }, 300);
+  }, []);
+
+  // タブが非表示になったらBGMを停止、戻ったら再開
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!bgmRef.current) return;
+
+      if (document.hidden) {
+        bgmRef.current.pause();
+      } else {
+        if (!isMutedRef.current) {
+          bgmRef.current.play().catch(() => {});
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   // クリーンアップ（メモリリーク対策）
@@ -225,6 +276,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
     isMuted,
     volume,
     currentBGM,
+    isIOS,
     toggleMute,
     setVolume,
     playBGM,
