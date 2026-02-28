@@ -48,13 +48,16 @@ export default function AdsenseUnit({ className = "", slot, format = "auto" }: P
   if (!client || !adSlot) return null;
 
   return (
-    <ins
-      className={`adsbygoogle block ${className}`}
-      style={{ display: "block" }}
-      data-ad-client={client}
-      data-ad-slot={adSlot}
-      data-ad-format={format}
-      data-full-width-responsive="true"
-    />
+    <div>
+      <p className="text-xs text-white/40 text-right mb-0.5 px-1">広告</p>
+      <ins
+        className={`adsbygoogle block ${className}`}
+        style={{ display: "block" }}
+        data-ad-client={client}
+        data-ad-slot={adSlot}
+        data-ad-format={format}
+        data-full-width-responsive="true"
+      />
+    </div>
   );
 }

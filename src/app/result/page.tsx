@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameContext } from '../contexts/GameContext';
 import { useAudio } from '../contexts/AudioContext';
@@ -10,7 +10,7 @@ import VictoryAnimation from '../components/VictoryAnimation';
 import { LooseAnimation } from '../components/LooseAnimation';
 import TieAnimation from '../components/TieAnimation';
 import FixedBottomAd from '../components/FixedBottomAd';
-import AdsenseModal from '../components/AdsenseModal';
+import AdsenseUnit from '../components/AdsenseUnit';
 
 export default function ResultPage() {
   const { gameState, startNewGame } = useGameContext();
@@ -18,8 +18,7 @@ export default function ResultPage() {
   const router = useRouter();
   const winner = OthelloGame.getWinner(gameState.board);
 
-  const [showAdModal, setShowAdModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState<null | 'rematch' | 'home'>(null);
+
 
   // リザルト画面を開いた時にBGMを再生（初回のみ）
   useEffect(() => {
@@ -28,32 +27,13 @@ export default function ResultPage() {
   }, []);
 
   const handleRematch = () => {
-    setPendingAction('rematch');
-    setShowAdModal(true);
+    startNewGame();
+    router.push('/game');
   };
 
   const handleBackToHome = () => {
-    setPendingAction('home');
-    setShowAdModal(true);
+    router.push('/');
   };
-
-  const handleAdComplete = () => {
-    setShowAdModal(false);
-
-    if(pendingAction === 'rematch') {
-      startNewGame();
-      router.push('/game');
-    } else if (pendingAction === 'home') {
-      router.push('/');
-    }
-
-    setPendingAction(null);
-  }
-
-  const handleCloseModal = () => {
-    setShowAdModal(false);
-    setPendingAction(null);
-  }
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center py-8">
@@ -72,7 +52,7 @@ export default function ResultPage() {
       <div className="absolute top-10 left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-float" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-yellow-400/10 rounded-full blur-3xl animate-float-delayed" />
       
-      <div className="w-xl max-w-xl mx-auto px-4 relative z-10 mb-24">
+      <div className="w-xl max-w-xl mx-auto px-4 relative z-10 mb-80">
         <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl border border-white/20 animate-fade-in">
           <div className="text-center mb-8">
             <h1 className="text-xl sm:text-4xl font-bold text-white mb-4 drop-shadow-2xl">ゲーム終了！</h1>
@@ -178,17 +158,20 @@ export default function ResultPage() {
               トップへ戻る
             </button>
           </div>
+
+          {/* インライン広告 */}
+          <div className="mt-8">
+            <AdsenseUnit
+              className="rounded-xl overflow-hidden"
+              slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT}
+              format="auto"
+            />
+          </div>
         </div>
       </div>
 
       <FixedBottomAd />
 
-      {/* 広告モーダル */}
-      <AdsenseModal
-        isOpen={showAdModal}
-        onClose={handleCloseModal}
-        onAdComplete={handleAdComplete}
-      />
     </div>
   );
 }
