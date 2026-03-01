@@ -78,7 +78,7 @@ export function GameProvider({ children }: GameProviderProps) {
       gamePhase: 'starting', // 開始メッセージ表示用
       scores: OthelloGame.countPieces(initialBoard),
       lastMove: null,
-      validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
+      validMoves: [], // startingフェーズ中はCPUの有効手を非表示
       isThinking: false,
       generationId: 0,
       difficulty: DEFAULT_DIFFICULTY
@@ -187,7 +187,7 @@ export function GameProvider({ children }: GameProviderProps) {
       gamePhase: 'starting', // 開始メッセージ表示用
       scores: OthelloGame.countPieces(initialBoard),
       lastMove: null,
-      validMoves: OthelloGame.getValidMoves(initialBoard, 'B'),
+      validMoves: [], // startingフェーズ中はCPUの有効手を非表示
       isThinking: false,
       generationId: Date.now(),
       difficulty: useDifficulty

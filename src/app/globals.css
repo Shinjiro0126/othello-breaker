@@ -156,3 +156,16 @@ body {
 .animate-break-text {
   animation: break-text 3.5s ease-out forwards;
 }
+
+/* 駒のフリップアニメーション */
+@keyframes piece-flip {
+  0%   { transform: perspective(120px) rotateY(0deg)    translateY(0px);   filter: brightness(1);   }
+  25%  { transform: perspective(120px) rotateY(-60deg)  translateY(-4px);  filter: brightness(0.75); }
+  50%  { transform: perspective(120px) rotateY(-90deg)  translateY(-6px);  filter: brightness(0.3);  }
+  75%  { transform: perspective(120px) rotateY(-120deg) translateY(-4px);  filter: brightness(0.75); }
+  100% { transform: perspective(120px) rotateY(-180deg) translateY(0px);   filter: brightness(1);   }
+}
+
+.animate-piece-flip {
+  animation: piece-flip 0.65s ease-in-out forwards;
+}

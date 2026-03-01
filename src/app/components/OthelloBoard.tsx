@@ -12,9 +12,10 @@ interface OthelloBoardProps {
   isBreakSelecting?: boolean;
   onBreakSelect?: (index: number) => void;
   brokenPieceIndex?: number | null;
+  flippedPieces?: number[];
 }
 
-function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBreakSelect, brokenPieceIndex = null }: OthelloBoardProps) {
+function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBreakSelect, brokenPieceIndex = null, flippedPieces = [] }: OthelloBoardProps) {
   const { playEffect } = useAudio();
 
   const renderCell = (piece: Piece, index: number) => {
@@ -23,6 +24,8 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
     const isBrokenPiece = brokenPieceIndex === index;
 
     // Break selection mode: highlight opponent (black) non-corner pieces
+    const flipIndex = flippedPieces.indexOf(index);
+    const isFlipped = flipIndex !== -1;
     const isBreakTarget = isBreakSelecting && piece === 'B' && !CORNERS.includes(index);
     const isBreakCorner = isBreakSelecting && piece === 'B' && CORNERS.includes(index);
 
@@ -68,8 +71,10 @@ function OthelloBoard({ gameState, onCellClick, isBreakSelecting = false, onBrea
               ${!isBreakSelecting && isLastMove ? 'ring-2 sm:ring-4 ring-red-400 scale-110' : ''}
               ${isBreakTarget ? 'animate-break-pulse' : ''}
               ${isBrokenPiece ? 'ring-4 ring-cyan-300 shadow-[0_0_20px_rgba(103,232,249,0.8)] animate-pulse' : ''}
+              ${isFlipped ? 'animate-piece-flip' : ''}
               ${!isBreakSelecting ? 'hover:scale-105' : ''}
             `}
+            style={isFlipped ? { animationDelay: `${flipIndex * 60}ms` } : undefined}
           />
         )}
         {!isBreakSelecting && isValidMove && !piece && (

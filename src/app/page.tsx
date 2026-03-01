@@ -99,33 +99,51 @@ export default function Home() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="backdrop-blur-xl bg-white/10 p-4 sm:p-8 rounded-3xl shadow-2xl mb-4 sm:mb-0 border border-white/20 hover:bg-white/15 transition-all duration-300 animate-slide-up lg:col-span-1">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-white drop-shadow-lg">対戦成績</h2>
             </div>
-            
-            {/* 難易度フィルタ */}
-            <div className="mb-6">
-              <select
-                value={statsFilter}
-                onChange={(e) => setStatsFilter(e.target.value as DifficultyLevel | 'all')}
-                className="w-full px-4 py-2 rounded-xl bg-white/20 text-white border border-white/30 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-blue-400/50 transition-all cursor-pointer"
-              >
-                <option value="all" className="bg-gray-800">全ての難易度</option>
-                <option value="beginner" className="bg-gray-800">ビギナー</option>
-                <option value="normal" className="bg-gray-800">ノーマル</option>
-                <option value="hard" className="bg-gray-800">ハード</option>
-                <option value="master" className="bg-gray-800">マスター</option>
-              </select>
+
+            {/* 成績絞り込みタブ（ゲーム難易度とは別） */}
+            <div className="mb-5">
+              <div className="flex flex-wrap gap-1.5">
+                {(['all', 'beginner', 'normal', 'hard', 'master'] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setStatsFilter(level)}
+                    className={`px-3 py-1 rounded-full text-xs font-bold transition-all duration-200 border ${
+                      statsFilter === level
+                        ? 'text-yellow-500 border-yellow-400 shadow-md shadow-yellow-500/30'
+                        : 'bg-white/10 text-white/60 border-white/20 hover:bg-white/20 hover:text-white'
+                    }`}
+                  >
+                    {level === 'all' ? 'すべて' : DIFFICULTY_LABELS[level]}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className='space-y-4'>
-              <div className="backdrop-blur-md bg-gradient-to-br from-blue-800/20 to-blue-500/20 p-4 sm:p-6 rounded-2xl border border-white/20 hover:scale-105 transition-transform duration-300 text-center">
-                <div className="text-4xl font-bold text-yellow-400 drop-shadow-lg mb-2">
-                  {stats.totalGames > 0
-                    ? Math.round((stats.wins / stats.totalGames) * 1000) / 10
-                    : 0}<span className='ml-1 text-lg'>%</span>
+              <div className="relative overflow-hidden backdrop-blur-md bg-gradient-to-br from-blue-300/15 via-blue-600/20 to-purple-400/15 p-5 rounded-2xl border border-white/20 hover:scale-105 transition-transform duration-300 text-center shadow-[0_0_30px_rgba(99,102,241,0.2)]">
+                {/* 背景装飾 */}
+                <div className="absolute -top-4 -right-4 w-20 h-20 bg-yellow-300/50 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-yellow-400/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="text-xs font-bold text-white/70 uppercase tracking-widest mb-2">勝率</div>
+                <div className="relative flex items-end justify-center gap-1 leading-none mb-2">
+                  <span className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-500 drop-shadow-lg tabular-nums">
+                    {stats.totalGames > 0
+                      ? Math.round((stats.wins / stats.totalGames) * 1000) / 10
+                      : 0}
+                  </span>
+                  <span className="text-xl font-bold text-yellow-400/80 mb-1">%</span>
                 </div>
-                <div className="text-sm text-white/80">勝率</div>
+                {/* プログレスバー */}  
+                <div className="w-full h-1.5 bg-white/40 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full transition-all duration-700"
+                    style={{ width: `${stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 1000) / 10 : 0}%` }}
+                  />
+                </div>
+                <div className="text-xs text-white/80 mt-2">{stats.wins}勝 / {stats.totalGames}戦</div>
               </div>
 
               <div className="backdrop-blur-md p-3 sm:p-4 rounded-xl border border-white/20 hover:scale-105 transition-transform duration-300 flex items-center justify-between">
@@ -157,12 +175,17 @@ export default function Home() {
                 {(Object.keys(DIFFICULTY_CONFIGS) as DifficultyLevel[]).map((level) => (
                   <label
                     key={level}
-                    className={`flex items-start p-3 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
+                    className={`relative flex items-start p-3 sm:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
                       selectedDifficulty === level
                         ? 'border-violet-300/70 bg-blue-500/20 ring-2 ring-blue-300/40 shadow-[0_0_30px_rgba(139,92,246,0.35)] backdrop-blur-md scale-102'
                         : 'border-white/20 hover:border-white/40 hover:bg-white/10 backdrop-blur-md'
                     }`}
                   >
+                    {selectedDifficulty === level && (
+                      <span className="absolute -top-2 -right-2 sm:top-[50%] sm:-translate-y-1/2 sm:right-2 text-xs font-bold bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white px-2 py-1 rounded-full shadow-md shadow-blue-500/20 leading-tight">
+                        選択中
+                      </span>
+                    )}
                     <input
                       type="radio"
                       name="difficulty"
@@ -203,7 +226,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={handleStartGame}
-                  className="group relative px-10 py-5 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white font-bold text-xl rounded-2xl hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-purple-500/50 overflow-hidden"
+                  className="group relative px-10 py-5 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-500 text-white font-bold text-lg sm:text-xl rounded-2xl hover:scale-110 transition-all duration-300 shadow-2xl hover:shadow-purple-500/50 overflow-hidden"
                 >
                   <span className="relative z-10">ゲームを開始</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-blue-600 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

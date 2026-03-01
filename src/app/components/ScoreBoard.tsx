@@ -29,43 +29,43 @@ function ScoreBoard({
   };
   return (
     <div className="backdrop-blur-xl bg-white/10 p-3 sm:p-6 rounded-3xl shadow-2xl border border-white/20 hover:bg-white/15 transition-all duration-300">
-      <h2 className="text-xl sm:text-2xl font-bold mb-6 text-center text-white drop-shadow-lg">スコア</h2>
+      <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-center text-white drop-shadow-lg">スコア</h2>
       
       <div className="space-y-4 mb-6">
-        <div className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 ${
+        <div className={`flex items-center justify-between p-2 sm:p-5 rounded-2xl border-2 transition-all duration-300 ${
           gameState.currentPlayer === 'B' 
             ? 'bg-gradient-to-r from-gray-800/80 to-black/80 border-gray-600 shadow-lg shadow-black/30 backdrop-blur-md scale-102' 
             : 'bg-white/10 border-white/20 backdrop-blur-sm'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-gray-800 to-black rounded-full border-3 border-gray-600 shadow-xl"></div>
             <span className={`font-bold sm:text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/80'
             }`}>
               CPU (黒)
             </span>
           </div>
-          <span className={`font-bold text-3xl drop-shadow-lg ${
+          <span className={`font-bold text-2xl sm:text-3xl drop-shadow-lg ${
             gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/80'
           }`}>
             {gameState.scores.black}
           </span>
         </div>
         
-        <div className={`flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 ${
+        <div className={`flex items-center justify-between p-2 sm:p-5 rounded-2xl border-2 transition-all duration-300 ${
           gameState.currentPlayer === 'W' 
             ? 'bg-gradient-to-r from-blue-600/80 to-purple-600/80 border-blue-400 shadow-lg shadow-blue-500/30 backdrop-blur-md scale-102' 
             : 'bg-white/10 border-white/20 backdrop-blur-sm'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-white to-gray-100 rounded-full border-3 border-gray-300 shadow-xl"></div>
             <span className={`font-bold sm:text-lg drop-shadow-lg ${
               gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/80'
             }`}>
               あなた (白)
             </span>
           </div>
-          <span className={`font-bold text-3xl drop-shadow-lg ${
+          <span className={`font-bold text-2xl sm:text-3xl drop-shadow-lg ${
             gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/80'
           }`}>
             {gameState.scores.white}

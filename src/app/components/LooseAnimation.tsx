@@ -6,9 +6,9 @@ export function LooseAnimation({ className = "" }: { className?: string }) {
       <Image
         src="/robot.svg"
         alt="CPUの勝利を表すイラスト"
-        width={250}
-        height={250}
-        className="animate-pulse"
+        width={200}
+        height={200}
+        className="animate-pulse w-24 h-24 sm:w-[200px] sm:h-[200px]"
       />
     </div>
   );

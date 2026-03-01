@@ -20,12 +20,15 @@ export default function GamePage() {
   const router = useRouter();
   const generationRef = useRef(0);
   const savedGameRef = useRef(false);
+  const cpuWaitingRef = useRef(false);
   const [showBreakFlash, setShowBreakFlash] = useState(false);
   const [showBreakText, setShowBreakText] = useState(false);
   const [showBreakCpuResume, setShowBreakCpuResume] = useState(false);
   const [showBreakConfirm, setShowBreakConfirm] = useState(false);
   const [showBreakInfo, setShowBreakInfo] = useState(false);
   const [brokenPieceIndex, setBrokenPieceIndex] = useState<number | null>(null);
+  const [flippedPieces, setFlippedPieces] = useState<number[]>([]);
+  const flippedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get difficulty configuration
   const difficultyConfig = DIFFICULTY_CONFIGS[gameState.difficulty || difficulty];
@@ -132,19 +135,31 @@ export default function GamePage() {
 
   // CPU手番時の処理（CPUは黒）
   useEffect(() => {
-    if (gameState.currentPlayer === 'B' && gameState.gamePhase === 'playing' && !gameState.isThinking) {
+    if (gameState.currentPlayer === 'B' && gameState.gamePhase === 'playing' && !gameState.isThinking && !cpuWaitingRef.current) {
+      cpuWaitingRef.current = true;
       generationRef.current++;
       const currentGen = generationRef.current;
 
-      setGameState(prev => ({
-        ...prev,
-        isThinking: true,
-        generationId: currentGen
-      }));
+      // プレイヤーが置いてから2秒待ってからCPUが打つ
+      const cpuDelayTimer = setTimeout(() => {
+        cpuWaitingRef.current = false;
+
+        setGameState(prev => ({
+          ...prev,
+          isThinking: true,
+          generationId: currentGen
+        }));
 
       thinkAsync(gameState.board, 'B', currentGen).then(({ move, gen }) => {
         if (gen !== generationRef.current) {
           return;
+        }
+
+        if (move !== null) {
+          const flipped = OthelloGame.getFlippedPieces(gameState.board, move, 'B');
+          if (flippedTimeoutRef.current) clearTimeout(flippedTimeoutRef.current);
+          setFlippedPieces(flipped);
+          flippedTimeoutRef.current = setTimeout(() => setFlippedPieces([]), 1200);
         }
 
         setGameState(prevState => {
@@ -215,6 +230,12 @@ export default function GamePage() {
           };
         });
       });
+      }, 2000); // 2秒待機
+
+      return () => {
+        clearTimeout(cpuDelayTimer);
+        cpuWaitingRef.current = false;
+      };
     }
   }, [gameState.currentPlayer, gameState.gamePhase, gameState.isThinking, thinkAsync, setGameState]);
 
@@ -228,6 +249,11 @@ export default function GamePage() {
 
     const newBoard = OthelloGame.makeMove(gameState.board, index, 'W');
     if (!newBoard) return;
+
+    const flipped = OthelloGame.getFlippedPieces(gameState.board, index, 'W');
+    if (flippedTimeoutRef.current) clearTimeout(flippedTimeoutRef.current);
+    setFlippedPieces(flipped);
+    flippedTimeoutRef.current = setTimeout(() => setFlippedPieces([]), 1200);
 
     generationRef.current++;
 
@@ -447,7 +473,7 @@ export default function GamePage() {
       {/* Break confirmation / explanation modal */}
       {showBreakConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="backdrop-blur-xl bg-white/10 p-8 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in text-center max-w-sm w-full mx-4">
+          <div className="backdrop-blur-xl bg-white/10 p-3 sm:p-8 rounded-3xl shadow-2xl border-2 border-yellow-400/50 animate-fade-in text-center max-w-sm w-full">
             <div className="text-4xl mb-3">⚡</div>
             <h2 className="text-2xl font-black text-yellow-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)] mb-4">
               必殺技「Break」発動
@@ -458,7 +484,7 @@ export default function GamePage() {
               <li>• 使用後は<strong className="font-bold text-yellow-300">相手のターン</strong>に移行</li>
               <li>• 通常の石の反転は<strong className="font-bold text-white/70">起こらない</strong>（選んだ石のみ変化）</li>
             </ul>
-            <p className="text-white/70 text-xs mb-6">この一手が、形勢を変える。本当に発動しますか？</p>
+            <p className="text-white/70 text-xs mb-6">この一手が、形勢を変える。<br className='sm:hidden' />本当に発動しますか？</p>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleBreakCancel}
@@ -477,7 +503,7 @@ export default function GamePage() {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto px-4 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 relative z-10 mb-28">
         {/* ゲーム開始メッセージ */}
         {gameState.gamePhase === 'starting' && (
           <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-md">
@@ -493,18 +519,7 @@ export default function GamePage() {
           </div>
         )}
 
-        <div className="text-center mb-6 sm:mb-8 animate-fade-in">
-          <h1 className="text-6xl font-bold text-white mb-2 drop-shadow-2xl tracking-tight">
-                      <Image 
-                        src="/logo.png" 
-                        alt="Othello Breaker" 
-                        width={400} 
-                        height={120} 
-                        className="mx-auto" 
-                        priority
-                        quality={85}
-                      />
-                    </h1>
+        <div className="text-center mb-4 sm:mb-8 animate-fade-in">
           <div className="inline-flex gap-3 items-center backdrop-blur-md bg-white/20 px-6 py-2 rounded-full mb-4 border border-white/30">
             <span className="text-white/90 text-sm font-medium drop-shadow-lg">
               モード: {gameState.difficulty === 'beginner' ? 'ビギナー' : gameState.difficulty === 'normal' ? 'ノーマル' : gameState.difficulty === 'hard' ? 'ハード' : 'マスター'}
@@ -518,7 +533,7 @@ export default function GamePage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 items-start">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 items-start mb-12">
           <div className="flex justify-center animate-slide-up w-full">
             <div className="w-full max-w-[600px]">
               {/* Break selection instruction banner */}
@@ -544,11 +559,12 @@ export default function GamePage() {
                 isBreakSelecting={isBreakSelecting}
                 onBreakSelect={handleBreakSelect}
                 brokenPieceIndex={brokenPieceIndex}
+                flippedPieces={flippedPieces}
               />
             </div>
           </div>
           
-          <div className="space-y-6 animate-slide-up w-full" style={{animationDelay: '0.1s'}}>
+          <div className="space-y-6 animate-slide-up w-full mb-12 hidden xl:block" style={{animationDelay: '0.1s'}}>
             <ScoreBoard 
               gameState={gameState}
               breakModeEnabled={breakModeEnabled}
@@ -577,7 +593,7 @@ export default function GamePage() {
             {showBreakInfo && (
               <div className="fixed inset-0 z-50 flex items-end justify-center p-4" onClick={() => setShowBreakInfo(false)}>
                 <div
-                  className="w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-3 shadow-2xl animate-fade-in mb-24"
+                  className="w-full max-w-md backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-3 shadow-2xl animate-fade-in mb-32"
                   onClick={e => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -602,6 +618,22 @@ export default function GamePage() {
               </div>
             )}
             <div className="backdrop-blur-xl bg-gradient-to-t from-black/80 to-black/60 border-t border-white/20 px-4 pt-3 pb-6 shadow-2xl">
+              {/* スコア行 */}
+              <div className="max-w-2xl mx-auto flex items-center justify-between gap-3 mb-2 pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-gradient-to-br from-gray-800 to-black rounded-full border-2 border-gray-600 shadow"></div>
+                  <span className={`text-xs font-bold ${ gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/60'}`}>CPU</span>
+                  <span className={`text-lg font-black ${ gameState.currentPlayer === 'B' ? 'text-white' : 'text-white/60'}`}>{gameState.scores.black}</span>
+                  {gameState.currentPlayer === 'B' && !gameState.isThinking && <span className="text-xs text-red-400 animate-pulse">●</span>}
+                  {gameState.isThinking && <span className="text-xs text-blue-300 animate-pulse">思考中…</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  {gameState.currentPlayer === 'W' && !gameState.isThinking && <span className="text-xs text-red-400 animate-pulse">●</span>}
+                  <span className={`text-lg font-black ${ gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/60'}`}>{gameState.scores.white}</span>
+                  <span className={`text-xs font-bold ${ gameState.currentPlayer === 'W' ? 'text-white' : 'text-white/60'}`}>あなた</span>
+                  <div className="w-4 h-4 bg-gradient-to-br from-white to-gray-100 rounded-full border-2 border-gray-300 shadow"></div>
+                </div>
+              </div>
               <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-white text-sm drop-shadow-md flex items-center gap-2">
